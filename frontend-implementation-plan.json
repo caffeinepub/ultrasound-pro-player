@@ -1,75 +1,87 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Fix file picker audio playback — selected files do not play",
+  "title": "Build Bluetooth Speaker Display, Smart Chip Processor Page, and Sound Magnet feature",
   "requirements": [
     {
-      "id": "REQ-24",
-      "summary": "Fix the audio playback pipeline so selected audio files play when clicked in the playlist, ensuring AudioContext is resumed, object URLs are correctly assigned to HTMLAudioElement, source nodes are connected to the filter chain, and play() promises are properly handled",
+      "id": "REQ-26",
+      "summary": "Build Bluetooth Speaker Display panel showing 2–3 animated speaker illustrations with live output power (watts) and dB level driven by Web Audio API analyser/gain node, speaker cone animation synced to music amplitude",
       "acceptanceCriteria": [
-        "Selecting one or more audio files (MP3, WAV, FLAC, OGG, AAC) via the file picker adds them to the playlist.",
-        "Clicking a track in the playlist loads it into the player and begins playback automatically (or on pressing Play), producing audible sound.",
-        "The AudioContext is resumed from 'suspended' state before playback starts to satisfy browser autoplay policy.",
-        "The HTMLAudioElement src is correctly set to the object URL of the selected file before play() is called.",
-        "The media element source node is properly connected to the 20-band EQ filter chain → GainNode → AnalyserNode → destination before playback.",
-        "If the play() promise rejects, the error is caught and a visible error message is shown to the user.",
-        "Subsequent track selections (Next, Previous, clicking another playlist item) also play audio correctly.",
-        "The Play/Pause/Stop controls in PlayerControls respond correctly once a track is loaded and the battery is at 100%.",
-        "No console errors related to AudioContext state, disconnected nodes, or unhandled promise rejections during normal playback."
+        "2–3 Bluetooth speaker illustrations are visible on screen within a dedicated panel",
+        "Live wattage output and dB level are displayed and update in real time as audio plays",
+        "Speaker cone animation pulses/moves in sync with music amplitude",
+        "Panel uses the existing dark glassmorphism style with gold/blue glow accents",
+        "Panel is titled 'BLUETOOTH SPEAKER OUTPUT'"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useAudioPlayer.ts",
-          "operation": "modify",
-          "description": "Ensure that when play() is called, the AudioContext is resumed if suspended, the HTMLAudioElement src is set to the current track's object URL before playback starts, and the play() promise is awaited with proper error handling that catches and logs rejections. Add error state to expose playback errors to the UI."
-        },
-        {
-          "path": "frontend/src/hooks/useAudioEngine.ts",
-          "operation": "modify",
-          "description": "Fix the AudioContext initialization and source node connection logic to ensure the context is resumed from 'suspended' state before playback, the MediaElementSourceNode is created only once per HTMLAudioElement (avoiding 'InvalidStateError'), and the source node is properly connected to the 20-band EQ filter chain → GainNode → AnalyserNode → destination. Expose AudioContext state and connection status."
+          "path": "frontend/src/components/BluetoothSpeakerDisplay.tsx",
+          "operation": "create",
+          "description": "Create a React component that renders the Bluetooth Speaker Output panel. Display 2–3 animated speaker illustrations using the generated image frontend/public/assets/generated/bluetooth-speaker.dim_120x120.png. Each speaker shows a pulsing/moving speaker cone driven by the current audio amplitude from the analyserNode prop. Display live output power in watts (calculated from gain node output) and dB level (calculated from analyser data) updated in real time. Use dark glassmorphism card style with gold/blue glow accents. Title the panel 'BLUETOOTH SPEAKER OUTPUT'. Accept analyserNode and gainNode as props to read live audio data."
         },
         {
           "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Pass playback error state from useAudioPlayer to PlayerControls or render an error toast/banner when play() fails. Ensure that when a playlist track is selected, the object URL is passed to the player and the audio engine is notified to reconnect the source node if needed."
-        },
-        {
-          "path": "frontend/src/components/PlayerControls.tsx",
-          "operation": "modify",
-          "description": "Display playback error messages passed from App.tsx when play() promise rejects. Ensure the Play button triggers playback only after the audio engine source is connected and the AudioContext is running."
+          "description": "Import and render the BluetoothSpeakerDisplay component in the main app layout. Pass the analyserNode and gainNode from the useAudioEngine hook as props to the component. Position the panel below the spectrum visualizer or in a dedicated section of the layout to ensure it is visible and integrated with the existing UI flow."
         }
       ]
     },
     {
-      "id": "REQ-25",
-      "summary": "Audit and fix the integration between useAudioFiles.ts, useAudioPlayer.ts, and useAudioEngine.ts in App.tsx to ensure file selection → object URL creation → track selection → src assignment → AudioContext initialization → source node connection → play() invocation works end-to-end without race conditions or missing wiring",
+      "id": "REQ-27",
+      "summary": "Build a dedicated Processor page titled 'NUMBER 1 PROCESSOR IN THE WHOLE WORLD' displaying four custom processor classes (Class A+/B/C+/D), 20 Smart Chip cards with status indicators, Smart Chip Stabilizer range, Automatic Frequency Control with live animated indicator from AnalyserNode, and battery charge level from useBatteryCharging hook",
       "acceptanceCriteria": [
-        "App.tsx correctly passes the selected track's object URL to the player hook when a playlist item is clicked.",
-        "useAudioPlayer correctly sets the HTMLAudioElement src and calls play() after the audio engine source node is connected.",
-        "useAudioEngine.ts initializes or resumes the AudioContext and creates/reconnects the MediaElementSourceNode whenever a new track src is assigned.",
-        "No duplicate MediaElementSourceNode creation errors ('InvalidStateError') occur when switching tracks.",
-        "The SpectrumVisualizer receives valid AnalyserNode data and animates while audio is playing."
+        "Processor page/panel is accessible from the app and titled 'NUMBER 1 PROCESSOR IN THE WHOLE WORLD'",
+        "Header displays Class A+ / Class B / Class C+ / Class D with 'More Super Clean Sound Control' subtitle",
+        "20 Smart Chip cards are rendered, each showing status indicators for Boost, Effect, Lagging, Clipping, Stuttering, Zero Background Noise",
+        "Smart Chip Stabilizer range 80,000–90,000 is displayed",
+        "Automatic Frequency Control section shows a live animated indicator driven by the audio AnalyserNode",
+        "Battery charge level from useBatteryCharging is shown in the processor panel",
+        "All sections use dark glassmorphism card style with gold/blue glow"
       ],
       "file_operations": [
         {
+          "path": "frontend/src/components/ProcessorPage.tsx",
+          "operation": "create",
+          "description": "Create a React component rendering the full Processor page. Title: 'NUMBER 1 PROCESSOR IN THE WHOLE WORLD'. Header section: display 'Class A+ / Class B / Class C+ / Class D' with subtitle 'More Super Clean Sound Control — Not Your Standard Regular Classes'. Main content: (1) Render 20 Smart Chip cards in a grid layout, each card showing the chip number and status indicators (Boost, Effect, Lagging, Clipping, Stuttering, Zero Background Noise) as icon badges or colored indicators. (2) Display '80Hz Deep Low Manager — controlled by the Smart Chip Stabilizer'. (3) Show 'Smart Chip Stabilizer' range: 80,000–90,000. (4) Render 'Intelligent Amp' section: 'Does NOT Limit Music — It CORRECTS It — It Is A Stabilizer'. (5) Display 'Full Stabilizer Power — Super Amp Control — Super Modes for Everything'. (6) Automatic Frequency Control section with a live animated indicator (bar/ring/wave) that responds to frequency content from the analyserNode prop. (7) Special DAW VST Generator section: 'Big Grant FPGA, CPU Booster, Signal Stimulation'. (8) Spec readout: '12 Volt — Best Processor World — 20 Core — 30 Thunders Wide'. (9) Display battery charge level from the batteryState prop (useBatteryCharging hook). Use dark glassmorphism card style with gold/blue glow for all sections. Accept analyserNode and batteryState as props."
+        },
+        {
           "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Review and fix the integration between useAudioFiles, useAudioPlayer, and useAudioEngine hooks. Ensure that when a track is selected from the playlist, its object URL is passed to useAudioPlayer, which then sets the HTMLAudioElement src and triggers source node reconnection in useAudioEngine before calling play(). Fix any missing dependencies or race conditions that prevent playback from starting."
+          "description": "Import and render the ProcessorPage component in the main app layout. Pass the analyserNode from useAudioEngine and batteryState from useBatteryCharging as props. Position the processor page/panel as an expandable section or a dedicated route accessible from the main UI. Ensure it integrates with the existing layout without disrupting the current player controls, EQ, or visualizer."
+        }
+      ]
+    },
+    {
+      "id": "REQ-28",
+      "summary": "Build a Sound Magnet feature with a large animated radial field visualization that grows with audio amplitude, simulating room-filling sound, with a clearly visible ON/OFF toggle labeled 'SOUND MAGNET'",
+      "acceptanceCriteria": [
+        "Sound Magnet panel/overlay is visible in the app with an ON/OFF toggle labeled 'SOUND MAGNET'",
+        "When ON, a large animated radial field (concentric glowing rings or expanding gradient) is rendered and grows in size proportional to the current audio amplitude from the AnalyserNode",
+        "The visual field is clearly larger than the speaker illustration, representing room-filling sound",
+        "Animation uses gold/yellow glow colors matching the app theme",
+        "When OFF, the animation is fully hidden",
+        "Toggle is clearly accessible and labeled"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useSoundMagnet.ts",
+          "operation": "create",
+          "description": "Create a custom React hook to manage the Sound Magnet ON/OFF state. Return the current magnet state (boolean) and a toggle function. Use useState to track the ON/OFF state and persist it in component state (no backend persistence required)."
         },
         {
-          "path": "frontend/src/hooks/useAudioPlayer.ts",
-          "operation": "modify",
-          "description": "Refactor the hook to ensure that when a new track src is set, the audio engine is notified to initialize/reconnect the MediaElementSourceNode before play() is invoked. Add a loading state to prevent play() from being called before the source is connected. Ensure play() is awaited and any rejection is caught."
+          "path": "frontend/src/components/SoundMagnet.tsx",
+          "operation": "create",
+          "description": "Create a React component rendering the Sound Magnet visualization. Accept analyserNode and isOn props. When isOn is true, render a large animated radial field (concentric glowing rings or expanding radial gradient) in the center panel or as an overlay. The field size and animation intensity are driven by the current audio amplitude from the analyserNode (read average amplitude or RMS from analyser data). Use gold/yellow glow colors matching the app theme. The visual field must be clearly larger than the speaker illustration to represent room-filling sound. When isOn is false, hide the animation completely. Use CSS animations or canvas/SVG rendering for smooth visuals."
         },
         {
-          "path": "frontend/src/hooks/useAudioEngine.ts",
-          "operation": "modify",
-          "description": "Refactor the source node connection logic to detect when the HTMLAudioElement src changes, automatically disconnect the old source node if present, create a new MediaElementSourceNode only if one does not exist for the current element, and reconnect it to the filter chain. Expose a 'ready' state that indicates the source is connected and the AudioContext is running."
+          "path": "frontend/src/components/SoundMagnetToggle.tsx",
+          "operation": "create",
+          "description": "Create a React component rendering the Sound Magnet ON/OFF toggle switch. Accept isOn and onToggle props. Render a clearly labeled button or switch control with the label 'SOUND MAGNET'. Use the existing UI styling (glassmorphism card, gold/blue glow) to match the app theme. When clicked, call onToggle to change the magnet state."
         },
         {
-          "path": "frontend/src/components/SpectrumVisualizer.tsx",
+          "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Ensure the component checks that the AnalyserNode is valid and connected before rendering spectrum data. Add a fallback to the flat line when the audio engine is not ready or the analyser has no data."
+          "description": "Import and wire the Sound Magnet feature into the app. Use the useSoundMagnet hook to manage the ON/OFF state. Render the SoundMagnetToggle component in a visible location (e.g., near the player controls or in a settings panel). Render the SoundMagnet component in a dedicated section or as an overlay, passing the analyserNode from useAudioEngine and the isOn state from useSoundMagnet. Ensure the toggle is clearly accessible and the animation integrates with the existing layout."
         }
       ]
     }

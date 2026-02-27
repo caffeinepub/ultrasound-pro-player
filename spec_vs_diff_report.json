@@ -1,35 +1,52 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-27T09:02:52.066Z",
-  "summary": "The diff implements the core requirements of REQ-24 and REQ-25: fixing the audio playback pipeline and integrating useAudioFiles, useAudioPlayer, and useAudioEngine. Key fixes include async play() with AudioContext resume, connectSource wiring, error handling with visible error banner, loadTrack with autoPlay flag, and App.tsx wiring. The implementation appears substantially complete for both requirements.",
+  "generatedAt": "2026-02-27T09:42:59.198Z",
+  "summary": "The diff implements all three required features (REQ-26, REQ-27, REQ-28) with dedicated components: BluetoothSpeakerDisplay.tsx, ProcessorPage.tsx, SoundMagnet.tsx, SoundMagnetToggle.tsx, and useSoundMagnet.ts hook. The App.tsx integrates all components with tab navigation. Most acceptance criteria appear to be met, with a few minor gaps identified due to file truncation.",
   "missing_requirements": [
     {
-      "requirement": "No duplicate MediaElementSourceNode creation errors ('InvalidStateError') occur when switching tracks.",
-      "reason": "The connectSource implementation in useAudioEngine.ts is truncated and cannot be confirmed to guard against re-creating a MediaElementAudioSourceNode for the same element, which would throw InvalidStateError when switching tracks.",
+      "id": "REQ-27",
+      "requirement": "Intelligent Amp status — 'Does NOT Limit Music — It CORRECTS It — It Is A Stabilizer' section must be present in the Processor page",
+      "reason": "The ProcessorPage.tsx diff is truncated mid-file before the lower spec sections are visible, making it impossible to confirm this specific text element is rendered.",
       "evidence": [
-        "frontend/src/hooks/useAudioEngine.ts",
-        "frontend/src/hooks/useAudioPlayer.ts"
+        "frontend/src/components/ProcessorPage.tsx"
       ]
     },
     {
-      "requirement": "The SpectrumVisualizer receives valid AnalyserNode data and animates while audio is playing.",
-      "reason": "The diff does not show changes to SpectrumVisualizer.tsx or explicit passing of the AnalyserNode from audioEngine to the SpectrumVisualizer in App.tsx. App.tsx is truncated and the file summaries do not mention SpectrumVisualizer wiring changes.",
+      "id": "REQ-27",
+      "requirement": "Special DAW VST Generator with Big Grant FPGA, CPU Booster, Signal Stimulation section must be present",
+      "reason": "The ProcessorPage.tsx diff is truncated before these sections can be confirmed as implemented.",
       "evidence": [
-        "frontend/src/App.tsx",
-        "frontend-file-summaries.txt"
+        "frontend/src/components/ProcessorPage.tsx"
+      ]
+    },
+    {
+      "id": "REQ-27",
+      "requirement": "Spec readout: 12 Volt — Best Processor World — 20 Core — 30 Thunders Wide must be displayed",
+      "reason": "The ProcessorPage.tsx diff is truncated and this specific spec readout section cannot be confirmed as present.",
+      "evidence": [
+        "frontend/src/components/ProcessorPage.tsx"
       ]
     }
   ],
-  "hallucinated_features": [],
+  "hallucinated_features": [
+    {
+      "description": "Sound Magnet toggle subtitle reads 'by Gerrod' and references 'Musi Baby M88' speaker model",
+      "reason": "The build request does not mention 'by Gerrod' or the specific 'Musi Baby M88' device name. These are additional text elements not requested in any requirement.",
+      "evidence": [
+        "frontend/src/components/SoundMagnetToggle.tsx"
+      ]
+    }
+  ],
   "confidence": 0.68,
   "changed_files": [
     "frontend-file-summaries.txt",
     "frontend/src/App.tsx",
-    "frontend/src/components/PlayerControls.tsx",
-    "frontend/src/components/Playlist.tsx",
-    "frontend/src/hooks/useAudioEngine.ts",
-    "frontend/src/hooks/useAudioPlayer.ts",
+    "frontend/src/components/BluetoothSpeakerDisplay.tsx",
+    "frontend/src/components/ProcessorPage.tsx",
+    "frontend/src/components/SoundMagnet.tsx",
+    "frontend/src/components/SoundMagnetToggle.tsx",
+    "frontend/src/hooks/useSoundMagnet.ts",
     "project_state.json"
   ]
 }

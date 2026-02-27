@@ -1,15 +1,11 @@
 # Specification
 
 ## Summary
-**Goal:** Fix the audio playback pipeline so that files selected via the file picker actually play in the UltraSound Pro app.
+**Goal:** Add three new features to UltraSound Pro: a Bluetooth Speaker Output display panel, a Number 1 Processor page, and a Sound Magnet visualization feature.
 
 **Planned changes:**
-- Ensure object URLs created from selected File objects are correctly assigned to the HTMLAudioElement `src` before playback begins
-- Resume the AudioContext from `suspended` state before calling `play()` to satisfy browser autoplay policy
-- Fix the integration between `useAudioFiles.ts`, `useAudioPlayer.ts`, and `useAudioEngine.ts` in `App.tsx` so the full data flow works end-to-end (file selection → URL creation → src assignment → source node connection → play)
-- Ensure the MediaElementSourceNode is correctly connected to the 20-band EQ filter chain → GainNode → AnalyserNode → destination before playback
-- Prevent duplicate MediaElementSourceNode creation errors when switching tracks
-- Await the `play()` promise and catch any rejections, displaying a visible error message to the user
-- Ensure subsequent track selections (Next, Previous, playlist click) also play correctly
+- Add a "BLUETOOTH SPEAKER OUTPUT" panel with 2–3 animated Bluetooth speaker illustrations whose cones pulse in sync with live audio amplitude from the Web Audio API AnalyserNode; display real-time output wattage and dB level; use dark glassmorphism card style with gold/blue glow accents
+- Add a "NUMBER 1 PROCESSOR IN THE WHOLE WORLD" page/panel with: Class A+ / B / C+ / D header labeled "More Super Clean Sound Control — Not Your Standard Regular Classes"; 20 Smart Chip cards each showing status indicators for Boost, Effect, Lagging, Clipping, Stuttering, and Zero Background Noise; 80Hz Deep Low Manager controlled by Smart Chip Stabilizer with range 80,000–90,000; Intelligent Amp status display; Full Stabilizer Power / Super Amp Control / Super Modes section; Automatic Frequency Control with live animated indicator driven by the AnalyserNode; Special DAW VST Generator with Big Grant FPGA, CPU Booster, Signal Stimulation; spec readout (12 Volt, 20 Core, 30 Thunders Wide); battery charge level from the existing useBatteryCharging hook; all in dark glassmorphism style with gold/blue glow
+- Add a "Sound Magnet — Stimulation Virtual Music Magnifier" panel with an ON/OFF toggle labeled "SOUND MAGNET"; when ON, render a large animated radial field (concentric glowing rings / expanding gold/yellow gradient) that grows proportionally to the current audio amplitude from the AnalyserNode, visually much larger than the speaker illustration; when OFF, hide the animation
 
-**User-visible outcome:** After selecting audio files via the file picker, clicking a track in the playlist produces audible sound and the spectrum visualizer animates. Play/Pause/Stop controls respond correctly once a track is loaded and the battery is at 100%.
+**User-visible outcome:** Users can view animated Bluetooth speaker output stats, explore a detailed processor spec page with live frequency and battery data, and toggle the Sound Magnet visualization that expands with volume to simulate room-filling sound.

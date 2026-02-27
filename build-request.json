@@ -1,68 +1,97 @@
 {
   "kind": "build_request",
-  "title": "Fix file picker audio playback — selected files do not play",
+  "title": "Build Bluetooth Speaker Display, Smart Chip Processor Page, and Sound Magnet feature",
   "projectName": "UltraSound Pro",
-  "priority": "high",
+  "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-24",
-      "text": "Fix the audio playback pipeline so that when a user selects audio files via the file picker (drag-and-drop or browse) and clicks a track in the playlist, the audio actually plays. The issue is that files can be selected and appear in the playlist but clicking Play or selecting a track does not produce any sound. Ensure the object URL created from the selected File is correctly assigned to the HTMLAudioElement src, the AudioContext is resumed (it may be in 'suspended' state due to browser autoplay policy), the source node is connected to the audio engine filter chain, and the play() promise is awaited and any rejection is caught and logged.",
+      "id": "REQ-26",
+      "text": "Build a Bluetooth Speaker Display panel that shows 2–3 animated Bluetooth speaker illustrations on screen. The panel displays live output data routed through the app's current audio settings: output power in watts and dB level being sent to the speaker, updated in real time from the Web Audio API analyser/gain node. Each speaker illustration renders an animated speaker cone that pulses and moves in sync with the music (scale or displacement driven by the current audio amplitude). The panel is titled 'BLUETOOTH SPEAKER OUTPUT' and uses the existing dark glassmorphism card style with gold/blue glow accents.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-latest"
+          "msg-recent"
         ],
         "quotes": [
-          "Let's get file window picker to play ok it does not play"
+          "put me a couple Bluetooth Speakers on the page ok random Booth speakers",
+          "you run my Setting through the Bluetooth speaker so I can see what dB and how Loud my system gets it shows up on the screen what my system is putting out power dB whats Being put in to the Speaker",
+          "I Like to see the music Literally moving and the music playing this is Call the Speaker Before you Buy it"
         ]
       },
       "acceptanceCriteria": [
-        "Selecting one or more audio files (MP3, WAV, FLAC, OGG, AAC) via the file picker adds them to the playlist.",
-        "Clicking a track in the playlist loads it into the player and begins playback automatically (or on pressing Play), producing audible sound.",
-        "The AudioContext is resumed from 'suspended' state before playback starts to satisfy browser autoplay policy.",
-        "The HTMLAudioElement src is correctly set to the object URL of the selected file before play() is called.",
-        "The media element source node is properly connected to the 20-band EQ filter chain → GainNode → AnalyserNode → destination before playback.",
-        "If the play() promise rejects, the error is caught and a visible error message is shown to the user.",
-        "Subsequent track selections (Next, Previous, clicking another playlist item) also play audio correctly.",
-        "The Play/Pause/Stop controls in PlayerControls respond correctly once a track is loaded and the battery is at 100%.",
-        "No console errors related to AudioContext state, disconnected nodes, or unhandled promise rejections during normal playback."
+        "2–3 Bluetooth speaker illustrations are visible on screen within a dedicated panel",
+        "Live wattage output and dB level are displayed and update in real time as audio plays",
+        "Speaker cone animation pulses/moves in sync with music amplitude",
+        "Panel uses the existing dark glassmorphism style with gold/blue glow accents",
+        "Panel is titled 'BLUETOOTH SPEAKER OUTPUT'"
       ]
     },
     {
-      "id": "REQ-25",
-      "text": "Audit and fix the integration between useAudioFiles.ts, useAudioPlayer.ts, and useAudioEngine.ts in App.tsx to ensure the full data flow works end-to-end: (1) file selection → object URL creation in useAudioFiles, (2) track selection → src assignment on the HTMLAudioElement in useAudioPlayer, (3) AudioContext initialization and source node connection in useAudioEngine when a new track is loaded, (4) play() invocation after the source is connected. Fix any missing wiring, incorrect hook dependency, or race condition that prevents playback from starting.",
+      "id": "REQ-27",
+      "text": "Build a dedicated Processor page (or expandable panel) in the app titled 'NUMBER 1 PROCESSOR IN THE WHOLE WORLD'. At the top, display the four custom processor classes: Class A+ / Class B / Class C+ / Class D — labeled 'More Super Clean Sound Control — Not Your Standard Regular Classes'. Below the header, render the full processor spec as a styled info display: (1) 20 Smart Chips — each with its own Built-in Control Monitor showing individual status indicators for Boost, Effect, Lagging, Clipping, Stuttering, and Zero Background Noise; (2) 80Hz Deep Low Manager — controlled by the Smart Chip Stabilizer; (3) Smart Chip Stabilizer range display: 80,000–90,000; (4) Intelligent Amp status — 'Does NOT Limit Music — It CORRECTS It — It Is A Stabilizer'; (5) Full Stabilizer Power — Super Amp Control — Super Modes for Everything; (6) Automatic Frequency Control — Adjusted to All Songs (show a live animated indicator that responds to the currently playing track's frequency content via the AnalyserNode); (7) Special DAW VST Generator — with Big Grant FPGA, CPU Booster, Signal Stimulation; (8) Spec readout: 12 Volt — Best Processor World — 20 Core — 30 Thunders Wide; (9) 'Mix with the Battery already located in the System' — display the current battery charge level from the existing useBatteryCharging hook. All elements use the dark glassmorphism card style with gold/blue glow.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-latest"
+          "msg-recent"
         ],
         "quotes": [
-          "it does not play"
+          "umber 1 Processor in the hole orld at/B/ct/d Not your Standerd egular Classes these are More Super lean Sound Control",
+          "there are 20 Smart Chips each Smart Chip has its own Built in Control Monitor boost effect lagging Clipping Studering Zero Back ground Notice",
+          "80hz is able to drop Low Managing By One of My Smart Chip Stablizer Control By Smart Chip Stablizer 80,000 to 90,000",
+          "intelligent amp that does Not Limited Music it Corrected it its a Stablizer control full Stabizer Power on Super amp control full Stabizer Power on Super Modes for everything automatic frequency Control adjusted to all Songs",
+          "Specail Denertor With a daw Vst plug in With a Big Grant fpga With Cpu Booster Sigal Stimulation",
+          "12 Volt Best Processor World 20 core 30 thunders Wide Mix With the Battery that already Located in the System"
         ]
       },
       "acceptanceCriteria": [
-        "App.tsx correctly passes the selected track's object URL to the player hook when a playlist item is clicked.",
-        "useAudioPlayer correctly sets the HTMLAudioElement src and calls play() after the audio engine source node is connected.",
-        "useAudioEngine.ts initializes or resumes the AudioContext and creates/reconnects the MediaElementSourceNode whenever a new track src is assigned.",
-        "No duplicate MediaElementSourceNode creation errors ('InvalidStateError') occur when switching tracks.",
-        "The SpectrumVisualizer receives valid AnalyserNode data and animates while audio is playing."
+        "Processor page/panel is accessible from the app and titled 'NUMBER 1 PROCESSOR IN THE WHOLE WORLD'",
+        "Header displays Class A+ / Class B / Class C+ / Class D with 'More Super Clean Sound Control' subtitle",
+        "20 Smart Chip cards are rendered, each showing status indicators for Boost, Effect, Lagging, Clipping, Stuttering, Zero Background Noise",
+        "Smart Chip Stabilizer range 80,000–90,000 is displayed",
+        "Automatic Frequency Control section shows a live animated indicator driven by the audio AnalyserNode",
+        "Battery charge level from useBatteryCharging is shown in the processor panel",
+        "All sections use dark glassmorphism card style with gold/blue glow"
+      ]
+    },
+    {
+      "id": "REQ-28",
+      "text": "Build a 'Sound Magnet — Stimulation Virtual Music Magnifier' feature. Render a large animated circular/radial field visualization in the center panel (or as an overlay) that grows in size as the audio volume/amplitude increases, simulating the sound filling the room. The magnet field must be visually much larger than a speaker — it represents the room being filled. The field animation uses concentric glowing rings or a pulsing radial gradient in gold/yellow that expand outward with volume. The feature has a clearly visible ON/OFF toggle switch labeled 'SOUND MAGNET'. When OFF, the animation is hidden. This feature is designed for small speakers (e.g. any small Bluetooth speaker) to make the audio feel larger than the physical speaker. The amplitude data is read from the existing Web Audio API AnalyserNode.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-recent"
+        ],
+        "quotes": [
+          "Gerrod created a Sound Magnet a Stimulation Virtual Music Magnif depends on how Big room Size is there is a Super Size Maset field as Voum gets Loud magnat gets Biger filling the hole room",
+          "Magnet Stimulation is more huge then the Speaker it Self this is for Small Speaker Like Musi Baby M88 or any Small Speaker",
+          "Its a Setting you can Switch of or on"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Sound Magnet panel/overlay is visible in the app with an ON/OFF toggle labeled 'SOUND MAGNET'",
+        "When ON, a large animated radial field (concentric glowing rings or expanding gradient) is rendered and grows in size proportional to the current audio amplitude from the AnalyserNode",
+        "The visual field is clearly larger than the speaker illustration, representing room-filling sound",
+        "Animation uses gold/yellow glow colors matching the app theme",
+        "When OFF, the animation is fully hidden",
+        "Toggle is clearly accessible and labeled"
       ]
     }
   ],
   "constraints": [
-    "Do not change backend/main.mo — no backend changes needed.",
-    "Do not modify any files listed in frontend.immutablePaths.",
-    "Preserve all existing EQ Stabilizer layout, instrument mappings, and bidirectional linking functionality.",
-    "Preserve the battery lock system — player controls must remain locked until battery reaches 100%."
+    "Do not modify any files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui",
+    "All audio data (amplitude, frequency) must be read from the existing Web Audio API AnalyserNode — do not create a second AudioContext",
+    "Battery charge data must be read from the existing useBatteryCharging hook — do not duplicate charging logic"
   ],
   "nonGoals": [
-    "Changing the visual design or layout of the file picker, playlist, or player controls.",
-    "Adding new audio formats beyond MP3, WAV, FLAC, OGG, AAC.",
-    "Modifying the battery charging animation or unlock logic.",
-    "Changing the EQ Stabilizer panel layout or instrument mappings."
+    "Actual Bluetooth hardware integration — the Bluetooth speaker display is a visual simulation using Web Audio API data",
+    "Real FPGA or DAW VST plugin connectivity — the processor page is a visual/informational display",
+    "Backend persistence of processor settings or sound magnet state",
+    "Changes to the existing EQ Stabilizer, playlist, or player controls layout"
   ],
   "imageRequirements": {
-    "required": [],
+    "required": [
+      "Colorful cartoon-style illustration of a Bluetooth portable speaker with a visible speaker cone, gold and dark blue color scheme, front-facing view (bluetooth-speaker.dim_120x120.png)"
+    ],
     "edits": []
   }
 }

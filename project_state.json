@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 19,
+  "projectStateVersion": 21,
   "summary": "Ultra-premium music player web app with dark blue/gold theme, file picker, Web Audio API player with battery charging lock system, combined 20-band EQ + 20 instrument controls panel where each EQ band slider is directly linked to one instrument — turning up an EQ band simultaneously boosts that instrument's sound. Instruments displayed with clean names/icons below the EQ row. 4 sound engines and canvas spectrum visualizer.",
   "architectural_notes": [
     "Single self-contained HTML file with embedded CSS and JavaScript",
@@ -16,6 +16,7 @@
     "File picker window does not trigger audio playback — files can be selected but music does not play"
   ],
   "isFixRequest": true,
+  "imageRequirements": "## Required Images\n- Colorful cartoon-style illustration of a Bluetooth portable speaker with a visible speaker cone, gold and dark blue color scheme, front-facing view (bluetooth-speaker.dim_120x120.png)",
   "existing_features": [
     {
       "id": "feature-implement-the-global-visual-theme-deep-dark-blue-gradient-background-060918-to-0d1440-primary-gold-yellow-accent-ffd700-electric-blue-secondary-00bfff-glassmorphism-panels-rgba-255-255-255-0-05-with-backdrop-blur-neon-glow-effects-in-yellow-and-blue-ultra-premium-bold-typography-white-and-yellow-text-app-title-bar-reads-ultrasound-pro-with-a-glowing-logo-treatment",
@@ -216,6 +217,30 @@
         "REQ-25"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-build-a-bluetooth-speaker-display-panel-that-shows-2-3-animated-bluetooth-speaker-illustrations-on-screen-the-panel-displays-live-output-data-routed-through-the-app-s-current-audio-settings-output-power-in-watts-and-db-level-being-sent-to-the-speaker-updated-in-real-time-from-the-web-audio-api-analyser-gain-node-each-speaker-illustration-renders-an-animated-speaker-cone-that-pulses-and-moves-in-sync-with-the-music-scale-or-displacement-driven-by-the-current-audio-amplitude-the-panel-is-titled-bluetooth-speaker-output-and-uses-the-existing-dark-glassmorphism-card-style-with-gold-blue-glow-accents",
+      "title": "Build a Bluetooth Speaker Display panel that shows 2–3 animated Bluetooth speaker illustrations on screen. The panel displays live output data routed through the app's current audio settings: output power in watts and dB level being sent to the speaker, updated in real time from the Web Audio API analyser/gain node. Each speaker illustration renders an animated speaker cone that pulses and moves in sync with the music (scale or displacement driven by the current audio amplitude). The panel is titled 'BLUETOOTH SPEAKER OUTPUT' and uses the existing dark glassmorphism card style with gold/blue glow accents.",
+      "reqIds": [
+        "REQ-26"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-a-dedicated-processor-page-or-expandable-panel-in-the-app-titled-number-1-processor-in-the-whole-world-at-the-top-display-the-four-custom-processor-classes-class-a-class-b-class-c-class-d-labeled-more-super-clean-sound-control-not-your-standard-regular-classes-below-the-header-render-the-full-processor-spec-as-a-styled-info-display-1-20-smart-chips-each-with-its-own-built-in-control-monitor-showing-individual-status-indicators-for-boost-effect-lagging-clipping-stuttering-and-zero-background-noise-2-80hz-deep-low-manager-controlled-by-the-smart-chip-stabilizer-3-smart-chip-stabilizer-range-display-80-000-90-000-4-intelligent-amp-status-does-not-limit-music-it-corrects-it-it-is-a-stabilizer-5-full-stabilizer-power-super-amp-control-super-modes-for-everything-6-automatic-frequency-control-adjusted-to-all-songs-show-a-live-animated-indicator-that-responds-to-the-currently-playing-track-s-frequency-content-via-the-analysernode-7-special-daw-vst-generator-with-big-grant-fpga-cpu-booster-signal-stimulation-8-spec-readout-12-volt-best-processor-world-20-core-30-thunders-wide-9-mix-with-the-battery-already-located-in-the-system-display-the-current-battery-charge-level-from-the-existing-usebatterycharging-hook-all-elements-use-the-dark-glassmorphism-card-style-with-gold-blue-glow",
+      "title": "Build a dedicated Processor page (or expandable panel) in the app titled 'NUMBER 1 PROCESSOR IN THE WHOLE WORLD'. At the top, display the four custom processor classes: Class A+ / Class B / Class C+ / Class D — labeled 'More Super Clean Sound Control — Not Your Standard Regular Classes'. Below the header, render the full processor spec as a styled info display: (1) 20 Smart Chips — each with its own Built-in Control Monitor showing individual status indicators for Boost, Effect, Lagging, Clipping, Stuttering, and Zero Background Noise; (2) 80Hz Deep Low Manager — controlled by the Smart Chip Stabilizer; (3) Smart Chip Stabilizer range display: 80,000–90,000; (4) Intelligent Amp status — 'Does NOT Limit Music — It CORRECTS It — It Is A Stabilizer'; (5) Full Stabilizer Power — Super Amp Control — Super Modes for Everything; (6) Automatic Frequency Control — Adjusted to All Songs (show a live animated indicator that responds to the currently playing track's frequency content via the AnalyserNode); (7) Special DAW VST Generator — with Big Grant FPGA, CPU Booster, Signal Stimulation; (8) Spec readout: 12 Volt — Best Processor World — 20 Core — 30 Thunders Wide; (9) 'Mix with the Battery already located in the System' — display the current battery charge level from the existing useBatteryCharging hook. All elements use the dark glassmorphism card style with gold/blue glow.",
+      "reqIds": [
+        "REQ-27"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-a-sound-magnet-stimulation-virtual-music-magnifier-feature-render-a-large-animated-circular-radial-field-visualization-in-the-center-panel-or-as-an-overlay-that-grows-in-size-as-the-audio-volume-amplitude-increases-simulating-the-sound-filling-the-room-the-magnet-field-must-be-visually-much-larger-than-a-speaker-it-represents-the-room-being-filled-the-field-animation-uses-concentric-glowing-rings-or-a-pulsing-radial-gradient-in-gold-yellow-that-expand-outward-with-volume-the-feature-has-a-clearly-visible-on-off-toggle-switch-labeled-sound-magnet-when-off-the-animation-is-hidden-this-feature-is-designed-for-small-speakers-e-g-any-small-bluetooth-speaker-to-make-the-audio-feel-larger-than-the-physical-speaker-the-amplitude-data-is-read-from-the-existing-web-audio-api-analysernode",
+      "title": "Build a 'Sound Magnet — Stimulation Virtual Music Magnifier' feature. Render a large animated circular/radial field visualization in the center panel (or as an overlay) that grows in size as the audio volume/amplitude increases, simulating the sound filling the room. The magnet field must be visually much larger than a speaker — it represents the room being filled. The field animation uses concentric glowing rings or a pulsing radial gradient in gold/yellow that expand outward with volume. The feature has a clearly visible ON/OFF toggle switch labeled 'SOUND MAGNET'. When OFF, the animation is hidden. This feature is designed for small speakers (e.g. any small Bluetooth speaker) to make the audio feel larger than the physical speaker. The amplitude data is read from the existing Web Audio API AnalyserNode.",
+      "reqIds": [
+        "REQ-28"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -251,6 +276,30 @@
     {
       "id": "AR-4",
       "summary": "Reshape the EQ Stabilizer panel into 4 rows of 5 columns each (top and bottom), reducing the overall size so it fits better on screen without being too large",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Add Bluetooth speaker display on screen showing live power output (watts) and dB being sent to the speaker, with speaker cone animation that pulses/moves in sync with the music",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Build a 20 Smart Chips processor system with individual Control Monitors per chip (boost, effect, lagging, clipping, stuttering, zero background noise), Smart Chip Stabilizer (80,000–90,000 range) that corrects music instead of limiting it, automatic frequency control that adjusts to any song, and custom classes A+/B/C+/D (More Super Clean Sound Control)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-7",
+      "summary": "Build a Sound Magnet (Stimulation Virtual Music Magnifier) — a virtual field that grows larger as volume increases, simulating filling the room with sound, especially for small speakers. On/off toggle switch.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-8",
+      "summary": "Fix low/unlimited memory issue so audio playback does not hit memory limits",
       "reqIds": [],
       "status": "pending"
     }
