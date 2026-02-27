@@ -1,0 +1,274 @@
+{
+  "kind": "build_request",
+  "title": "ULTRASOUND PRO — Ultra-Premium Music Player Web App",
+  "projectName": "UltraSound Pro",
+  "priority": "high",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "text": "Implement the global visual theme: deep dark blue gradient background (#060918 to #0d1440), primary gold/yellow accent (#FFD700), electric blue secondary (#00BFFF), glassmorphism panels (rgba(255,255,255,0.05) with backdrop-blur), neon glow effects in yellow and blue, ultra-premium bold typography (white and yellow text). App title bar reads 'ULTRASOUND PRO' with a glowing logo treatment.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Deep dark blue (#0a0e2a) background with vibrant yellow (#FFD700) accents",
+          "Premium glassmorphism UI, glowing neon effects, smooth animations",
+          "Background: #060918 to #0d1440 gradient"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Background renders as a dark blue gradient from #060918 to #0d1440",
+        "Gold/yellow (#FFD700) is used for all primary accents, active states, and highlights",
+        "Electric blue (#00BFFF) is used as a secondary accent",
+        "All panels use glassmorphism: semi-transparent background with backdrop-filter blur",
+        "Neon glow CSS effects appear on key interactive elements",
+        "App title 'ULTRASOUND PRO' is prominently displayed with a glowing effect at the top"
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Build a layout with four regions: (1) Top header bar with the app title and sound engine selector; (2) Left panel for file picker/playlist; (3) Center panel for player controls, spectrum visualizer, and battery system; (4) Bottom panel for the 20-band EQ followed by the 20 instrument controls.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Top: App title 'ULTRASOUND PRO' with glowing logo, sound engine selector",
+          "Left panel: File picker / playlist",
+          "Center: Player controls + spectrum visualizer + battery system",
+          "Bottom: Equalizer (20 bands) then below it the 20 instrument controls"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Header bar spans full width at the top with app title on the left and sound engine selector on the right",
+        "Left panel renders as a fixed-width sidebar with the file picker and playlist",
+        "Center panel displays player controls, the canvas-based spectrum visualizer, and the battery widget",
+        "Bottom section renders all 20 EQ sliders followed below by all 20 instrument sliders",
+        "Layout is responsive and does not overflow horizontally on standard desktop viewports"
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Implement a file picker modal/window with drag-and-drop support. Accepted formats: MP3, WAV, FLAC, OGG, AAC. The drop zone glows yellow on hover/drag-over. After files are selected, display a playlist list showing song name, duration, and format badge. Clicking a song in the list loads it into the player.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "A beautiful file picker window/modal that lets users browse and select audio files (MP3, WAV, FLAC, OGG, AAC)",
+          "Drag & drop support with glowing drop zone",
+          "File list showing song name, duration, format"
+        ]
+      },
+      "acceptanceCriteria": [
+        "A 'Browse Files' or '+' button opens a file picker modal",
+        "Users can also drag audio files directly onto the drop zone",
+        "Drop zone border glows yellow (#FFD700) when a file is dragged over it",
+        "Only MP3, WAV, FLAC, OGG, and AAC files are accepted; others are rejected with a visible notice",
+        "Added files appear in the playlist with name, duration, and format displayed",
+        "Clicking a playlist item loads that track into the player"
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Build the music player controls: Play, Pause, Stop, Next, Previous buttons and a seek bar. Display the song title, artist (parsed from file metadata or filename), and an album art placeholder. All player controls are disabled and visually locked until the battery reaches 100%.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Full player controls: Play, Pause, Stop, Next, Previous, Seek bar",
+          "Song info display: title, artist, album art placeholder",
+          "Music does NOT play until the battery is fully charged"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Play, Pause, Stop, Next, and Previous buttons are rendered with premium styling",
+        "A seek/scrub bar shows current position and allows seeking",
+        "Song title and artist are displayed; album art placeholder is shown when no artwork is available",
+        "All controls are visually disabled (greyed-out/locked appearance) when battery < 100%",
+        "Playback functions normally once battery is at 100%"
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "text": "Implement the animated battery charging system. Show a large battery widget with labeled capacity of 80,000W. A 200,000W charger animates with lightning bolt and electric arc SVG/CSS animations. Battery fill rises from 0% to 100% with a glowing yellow fill animation. A real-time counter displays 'Charging: X W / 200,000W'. Battery percentage is displayed in large text. While charging, show 'CHARGING… Music Locked'. At 100%, trigger a dramatic unlock animation and display 'FULLY CHARGED — Music Unlocked!'. Battery level maps to an 'Output Power: X watts' readout.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Giant animated battery display showing 80,000W capacity",
+          "A 200,000W charger that visibly charges the battery with animated lightning bolts and electric arcs",
+          "Battery charges from 0% to 100% with a dramatic animated progress — glowing yellow fill rising up",
+          "Real-time wattage numbers counting up as it charges",
+          "Music is LOCKED until battery hits 100%",
+          "Once charged: 'FULLY CHARGED — Music Unlocked!' with a dramatic unlock animation"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Battery widget shows a large stylized battery shape with '80,000W' capacity label",
+        "Lightning bolt and electric arc animations play during charging",
+        "Yellow fill visually rises from 0% to 100% inside the battery shape over the charging duration",
+        "Wattage counter increments in real time from 0 to 200,000W during charge",
+        "Large percentage text updates every tick",
+        "'CHARGING… Music Locked' message is shown during charge; controls are locked",
+        "At 100% a celebratory unlock animation (glow burst, text flash) plays and 'FULLY CHARGED — Music Unlocked!' message appears",
+        "'Output Power: X watts' readout reflects the current battery percentage mapped to wattage"
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "text": "Implement a 4-option sound engine selector in the header: 'Crystal Engine', 'Deep Bass Engine', 'Surround Engine', 'Pure HD Engine'. Each preset applies a distinct Web Audio API filter chain configuration. Switching engines updates the audio processing in real time with no audible glitch.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "4 Sound Engines selectable: 'Crystal Engine', 'Deep Bass Engine', 'Surround Engine', 'Pure HD Engine'",
+          "When switching engines, sound updates in real-time"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Header contains a styled selector showing all 4 engine names",
+        "Each engine applies a unique preset filter configuration to the Web Audio API graph",
+        "Switching engines while audio is playing updates the sound immediately without restarting playback",
+        "Active engine is visually highlighted in gold"
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "text": "Implement a 20-band equalizer using 20 Web Audio API BiquadFilterNodes in series at these frequencies: 20Hz, 40Hz, 80Hz, 160Hz, 250Hz, 500Hz, 1kHz, 2kHz, 4kHz, 8kHz, 16kHz, and 9 additional bands spread across the spectrum to total 20. Each band has a vertical slider showing ±12dB gain. Moving a slider instantly updates the corresponding BiquadFilterNode gain. When an EQ band is adjusted, any instrument controls linked to that frequency range are highlighted visually.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "20 EQ frequency bands: 20Hz, 40Hz, 80Hz, 160Hz, 250Hz, 500Hz, 1kHz, 2kHz, 4kHz, 8kHz, 16kHz, and more spread across the spectrum",
+          "Real-time audio filter processing using Web Audio API (BiquadFilterNode chains)",
+          "When you move an EQ band, any linked instruments highlight"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Exactly 20 frequency band sliders are rendered with frequency labels below each",
+        "Each slider controls the gain of a BiquadFilterNode at that frequency",
+        "Gain range is ±12dB; default is 0dB",
+        "Audio changes are audible in real time as sliders move",
+        "Moving an EQ slider highlights the instrument sliders whose frequency range overlaps"
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "text": "Render 20 instrument sliders below the EQ section for: Bass Guitar, Kick Drum, Snare, Hi-Hat, Piano, Violin, Cello, Trumpet, Saxophone, Flute, Acoustic Guitar, Electric Guitar, Synthesizer, Organ, Choir/Vocals, Strings, Percussion, Sub Bass, Cymbals, Harmonica. Each instrument slider boosts/cuts its characteristic EQ frequency bands simultaneously. Moving an instrument slider visually updates the linked EQ band sliders in real time.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "20 Instruments listed BELOW the EQ bands with their own sliders",
+          "Each instrument slider boosts/cuts its relevant EQ frequencies simultaneously",
+          "When you move an instrument slider, the corresponding EQ bands visually respond and update"
+        ]
+      },
+      "acceptanceCriteria": [
+        "All 20 instrument sliders are rendered with instrument name labels",
+        "Each instrument is mapped to a defined set of frequency bands",
+        "Moving an instrument slider adjusts the gain of its mapped BiquadFilterNodes and the corresponding EQ slider positions update visually",
+        "Audio effect is heard in real time"
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "text": "Render a real-time canvas-based frequency spectrum visualizer in the center panel. It reads from the Web Audio API AnalyserNode and draws a live frequency spectrum in yellow (#FFD700) using requestAnimationFrame. The visualizer is always active when audio is playing.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Live frequency spectrum visualizer (canvas-based) showing the audio waveform/spectrum in yellow",
+          "use requestAnimationFrame for visualizer"
+        ]
+      },
+      "acceptanceCriteria": [
+        "A HTML canvas element renders inside the center panel",
+        "The visualizer draws frequency bar or waveform data from an AnalyserNode",
+        "Bars/waveform are rendered in gold/yellow (#FFD700)",
+        "Animation runs via requestAnimationFrame with no dropped frames during normal playback",
+        "Visualizer reacts to EQ changes visually"
+      ]
+    },
+    {
+      "id": "REQ-10",
+      "text": "Implement the full Web Audio API audio engine: AudioContext with source node → 20 BiquadFilterNodes in series → GainNode → AnalyserNode → destination. Sound engine presets reconfigure filter parameters. All EQ and instrument changes are debounced (5–10ms) to prevent audio clicks/pops. Provide a graceful fallback message if Web Audio API is not available in the browser.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Use Web Audio API for all audio processing",
+          "EQ implemented as 20 BiquadFilterNodes in series",
+          "Debounced audio updates to prevent clicks/pops",
+          "Graceful fallback if Web Audio API unavailable"
+        ]
+      },
+      "acceptanceCriteria": [
+        "AudioContext is created on first user interaction to comply with browser autoplay policy",
+        "Audio signal chain is: source → 20 BiquadFilterNodes → GainNode → AnalyserNode → destination",
+        "Sound engine presets change filter type/frequency/Q/gain values across the chain",
+        "EQ/instrument slider changes are debounced to prevent audible clicks",
+        "If AudioContext is unavailable, a visible fallback notice is shown instead of a broken UI"
+      ]
+    },
+    {
+      "id": "REQ-11",
+      "text": "Add React error boundaries around every major section (file picker, player, battery, EQ, instrument panel, visualizer). On error, each boundary displays a styled fallback UI with a 'Retry' button that resets the component state and attempts re-render.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Error boundaries everywhere — if anything fails, it auto-resets and retries"
+        ]
+      },
+      "acceptanceCriteria": [
+        "ErrorBoundary components wrap the file picker, player controls, battery widget, EQ section, instrument section, and visualizer canvas",
+        "On caught error, each boundary shows a styled error card with section name and a 'Retry' button",
+        "Clicking Retry resets the boundary state and re-renders the child component"
+      ]
+    }
+  ],
+  "constraints": [
+    "All audio processing must use the Web Audio API — no third-party audio libraries",
+    "No backend persistence is required; all state is client-side only",
+    "Color palette must strictly follow the spec: #060918–#0d1440 background, #FFD700 primary, #00BFFF secondary",
+    "Music playback must remain locked until the battery animation completes at 100%",
+    "Spectrum visualizer must use requestAnimationFrame — no setInterval-based rendering"
+  ],
+  "nonGoals": [
+    "No backend canister storage of audio files or user preferences",
+    "No Internet Identity or user authentication",
+    "No streaming from remote URLs — local file system only via File API",
+    "No mobile-specific responsive layout optimization",
+    "No lyrics display or song metadata fetching from external APIs"
+  ],
+  "imageRequirements": {
+    "required": [
+      "Glowing gold lightning bolt icon on dark transparent background, electric arc style (lightning-bolt-icon.dim_128x128.png)",
+      "Abstract sound wave / audio spectrum graphic in gold and electric blue on transparent background (spectrum-hero.dim_800x200.png)",
+      "Premium circular speaker grille / woofer illustration in gold on deep dark blue (speaker-logo.dim_256x256.png)"
+    ],
+    "edits": []
+  }
+}

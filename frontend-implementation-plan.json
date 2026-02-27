@@ -1,0 +1,286 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "ULTRASOUND PRO — Ultra-Premium Music Player Web App",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "summary": "Implement the global visual theme with deep dark blue gradient background, gold/yellow accents, electric blue secondary, glassmorphism panels, neon glow effects, and ultra-premium typography with 'ULTRASOUND PRO' glowing title",
+      "acceptanceCriteria": [
+        "Background renders as a dark blue gradient from #060918 to #0d1440",
+        "Gold/yellow (#FFD700) is used for all primary accents, active states, and highlights",
+        "Electric blue (#00BFFF) is used as a secondary accent",
+        "All panels use glassmorphism: semi-transparent background with backdrop-filter blur",
+        "Neon glow CSS effects appear on key interactive elements",
+        "App title 'ULTRASOUND PRO' is prominently displayed with a glowing effect at the top"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Add global CSS custom properties for the color palette (#060918, #0d1440, #FFD700, #00BFFF), set body background to the deep dark blue gradient, define glassmorphism utility classes (semi-transparent backgrounds with backdrop-blur), and create neon glow effects (box-shadow) in gold and blue. Set base typography to white with bold font weights. Wire in the generated image frontend/public/assets/generated/speaker-logo.dim_256x256.png for branding if needed."
+        },
+        {
+          "path": "frontend/tailwind.config.js",
+          "operation": "modify",
+          "description": "Extend the Tailwind theme with custom colors (ultraDarkBlue, ultraGold, electricBlue) matching the spec, add custom utilities for glassmorphism effects (backdrop-blur variants), and configure neon glow shadow variants for interactive elements."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Build a layout with four regions: top header bar with app title and sound engine selector, left panel for file picker/playlist, center panel for player controls/spectrum visualizer/battery, and bottom panel for 20-band EQ followed by 20 instrument controls",
+      "acceptanceCriteria": [
+        "Header bar spans full width at the top with app title on the left and sound engine selector on the right",
+        "Left panel renders as a fixed-width sidebar with the file picker and playlist",
+        "Center panel displays player controls, the canvas-based spectrum visualizer, and the battery widget",
+        "Bottom section renders all 20 EQ sliders followed below by all 20 instrument sliders",
+        "Layout is responsive and does not overflow horizontally on standard desktop viewports"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Replace the default App structure with a four-region layout: (1) Header component at the top containing the app title 'ULTRASOUND PRO' with glowing styling and a SoundEngineSelector component; (2) Left sidebar panel containing FilePicker and Playlist components; (3) Center panel containing PlayerControls, SpectrumVisualizer, and BatteryWidget components; (4) Bottom section containing Equalizer (20 bands) and InstrumentControls (20 sliders) components. Apply glassmorphism styles to each panel. Use CSS Grid or Flexbox for the layout structure."
+        },
+        {
+          "path": "frontend/src/components/Header.tsx",
+          "operation": "create",
+          "description": "Create a Header component that renders a full-width bar with 'ULTRASOUND PRO' title on the left (using the speaker-logo.dim_256x256.png image as a logo if desired) and includes the SoundEngineSelector component on the right. Apply glowing text effect to the title using CSS text-shadow in gold. Use glassmorphism styling for the header background."
+        },
+        {
+          "path": "frontend/src/components/LeftPanel.tsx",
+          "operation": "create",
+          "description": "Create a LeftPanel component that wraps the FilePicker and Playlist components in a fixed-width sidebar layout with glassmorphism styling. This panel should be scrollable if content overflows."
+        },
+        {
+          "path": "frontend/src/components/CenterPanel.tsx",
+          "operation": "create",
+          "description": "Create a CenterPanel component that arranges PlayerControls at the top, SpectrumVisualizer in the middle, and BatteryWidget at the bottom. Use flexbox for vertical stacking and apply glassmorphism to the panel container."
+        },
+        {
+          "path": "frontend/src/components/BottomPanel.tsx",
+          "operation": "create",
+          "description": "Create a BottomPanel component that renders the Equalizer component first, followed by the InstrumentControls component below. Use vertical stacking with spacing and apply glassmorphism styling."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Implement a file picker modal with drag-and-drop support for MP3, WAV, FLAC, OGG, AAC files, glowing yellow drop zone on hover, and a playlist showing song name, duration, and format badge",
+      "acceptanceCriteria": [
+        "A 'Browse Files' or '+' button opens a file picker modal",
+        "Users can also drag audio files directly onto the drop zone",
+        "Drop zone border glows yellow (#FFD700) when a file is dragged over it",
+        "Only MP3, WAV, FLAC, OGG, and AAC files are accepted; others are rejected with a visible notice",
+        "Added files appear in the playlist with name, duration, and format displayed",
+        "Clicking a playlist item loads that track into the player"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/FilePicker.tsx",
+          "operation": "create",
+          "description": "Create a FilePicker component with a 'Browse Files' button that opens a file input dialog. Implement drag-and-drop event handlers (onDragOver, onDragLeave, onDrop) that toggle a yellow glow border on the drop zone when files are dragged over. Accept only MP3, WAV, FLAC, OGG, and AAC file types; display an error toast/notice for rejected files. Parse file metadata (name, duration via Audio element, format from extension) and add valid files to a playlist state array. Use glassmorphism and neon glow styling."
+        },
+        {
+          "path": "frontend/src/components/Playlist.tsx",
+          "operation": "create",
+          "description": "Create a Playlist component that receives an array of song objects (name, duration, format) and renders each as a clickable list item. Display song name, formatted duration (mm:ss), and a colored format badge (MP3/WAV/FLAC/OGG/AAC). When a song is clicked, emit an event or callback to load that track into the player. Style list items with glassmorphism and hover effects in gold."
+        },
+        {
+          "path": "frontend/src/hooks/useAudioFiles.ts",
+          "operation": "create",
+          "description": "Create a custom React hook useAudioFiles that manages the playlist state array, provides functions to add/remove audio files, and validates file types. This hook will be shared between FilePicker and Playlist components."
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Build music player controls (Play, Pause, Stop, Next, Previous, seek bar) with song title, artist, album art placeholder, all controls disabled and visually locked until battery reaches 100%",
+      "acceptanceCriteria": [
+        "Play, Pause, Stop, Next, and Previous buttons are rendered with premium styling",
+        "A seek/scrub bar shows current position and allows seeking",
+        "Song title and artist are displayed; album art placeholder is shown when no artwork is available",
+        "All controls are visually disabled (greyed-out/locked appearance) when battery < 100%",
+        "Playback functions normally once battery is at 100%"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/PlayerControls.tsx",
+          "operation": "create",
+          "description": "Create a PlayerControls component that renders Play, Pause, Stop, Next, and Previous buttons, a seek bar (range input), and displays the current song title, artist (parsed from metadata or filename), and an album art placeholder image. Receive a batteryLevel prop; when batteryLevel < 100, disable all buttons and apply a greyed-out locked visual style. When batteryLevel === 100, enable all controls and remove the locked styling. Use gold accents for active states and neon glow effects on interactive elements."
+        },
+        {
+          "path": "frontend/src/hooks/useAudioPlayer.ts",
+          "operation": "create",
+          "description": "Create a custom React hook useAudioPlayer that manages the HTMLAudioElement or Web Audio API source node, playback state (playing, paused, stopped), current time, duration, and seek functionality. Provide play, pause, stop, next, previous, and seek methods. This hook will be used by PlayerControls and integrated with the audio engine."
+        }
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "summary": "Implement the animated battery charging system with 80,000W capacity, 200,000W charger with lightning bolt and electric arc animations, glowing yellow fill rising from 0% to 100%, real-time wattage counter, dramatic unlock animation at 100%, and Output Power readout",
+      "acceptanceCriteria": [
+        "Battery widget shows a large stylized battery shape with '80,000W' capacity label",
+        "Lightning bolt and electric arc animations play during charging",
+        "Yellow fill visually rises from 0% to 100% inside the battery shape over the charging duration",
+        "Wattage counter increments in real time from 0 to 200,000W during charge",
+        "Large percentage text updates every tick",
+        "'CHARGING… Music Locked' message is shown during charge; controls are locked",
+        "At 100% a celebratory unlock animation (glow burst, text flash) plays and 'FULLY CHARGED — Music Unlocked!' message appears",
+        "'Output Power: X watts' readout reflects the current battery percentage mapped to wattage"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/BatteryWidget.tsx",
+          "operation": "create",
+          "description": "Create a BatteryWidget component that renders a large stylized battery graphic (SVG or CSS-based) with an '80,000W' capacity label. Display a '200,000W charger' label and wire in the generated lightning bolt icon from frontend/public/assets/generated/lightning-bolt-icon.dim_128x128.png. Implement a charging animation that increments battery percentage from 0% to 100% over a fixed duration (e.g., 10 seconds) using requestAnimationFrame or setInterval. Show a glowing yellow fill that rises inside the battery shape proportionally to the percentage. Display a real-time wattage counter (0 to 200,000W) and a large percentage text. During charging, show 'CHARGING… Music Locked' message. At 100%, trigger a dramatic unlock animation (CSS keyframe with glow burst and scale effect) and display 'FULLY CHARGED — Music Unlocked!' message. Include an 'Output Power: X watts' readout that maps battery percentage to wattage. Emit the battery level state to parent components to control player lock state."
+        },
+        {
+          "path": "frontend/src/hooks/useBatteryCharging.ts",
+          "operation": "create",
+          "description": "Create a custom React hook useBatteryCharging that manages the battery charging state, percentage, wattage counter, and unlock status. Provide a charging animation loop that increments the battery level from 0% to 100% over a configurable duration. Return current percentage, wattage, and isUnlocked boolean."
+        }
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "summary": "Implement a 4-option sound engine selector (Crystal Engine, Deep Bass Engine, Surround Engine, Pure HD Engine) that applies distinct Web Audio API filter chain configurations and updates in real time",
+      "acceptanceCriteria": [
+        "Header contains a styled selector showing all 4 engine names",
+        "Each engine applies a unique preset filter configuration to the Web Audio API graph",
+        "Switching engines while audio is playing updates the sound immediately without restarting playback",
+        "Active engine is visually highlighted in gold"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/SoundEngineSelector.tsx",
+          "operation": "create",
+          "description": "Create a SoundEngineSelector component that renders a styled dropdown or button group with four options: 'Crystal Engine', 'Deep Bass Engine', 'Surround Engine', 'Pure HD Engine'. When an engine is selected, emit an event or callback to update the audio engine configuration. Highlight the active engine in gold (#FFD700) and apply neon glow effects."
+        },
+        {
+          "path": "frontend/src/hooks/useAudioEngine.ts",
+          "operation": "create",
+          "description": "Create a custom React hook useAudioEngine that initializes the Web Audio API context and sets up the signal chain: source node → 20 BiquadFilterNodes → GainNode → AnalyserNode → destination. Provide a setSoundEngine function that accepts an engine name and reconfigures the filter chain parameters (type, frequency, Q, gain) for that preset. Ensure changes apply instantly without restarting playback. Export the AudioContext, AnalyserNode, and filter nodes for use by other components."
+        }
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "summary": "Implement a 20-band equalizer using 20 Web Audio API BiquadFilterNodes at specified frequencies, each with a vertical slider showing ±12dB gain, with real-time updates and visual highlighting of linked instrument controls",
+      "acceptanceCriteria": [
+        "Exactly 20 frequency band sliders are rendered with frequency labels below each",
+        "Each slider controls the gain of a BiquadFilterNode at that frequency",
+        "Gain range is ±12dB; default is 0dB",
+        "Audio changes are audible in real time as sliders move",
+        "Moving an EQ slider highlights the instrument sliders whose frequency range overlaps"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/Equalizer.tsx",
+          "operation": "create",
+          "description": "Create an Equalizer component that renders exactly 20 vertical sliders, each labeled with its frequency (20Hz, 40Hz, 80Hz, 160Hz, 250Hz, 500Hz, 1kHz, 2kHz, 4kHz, 8kHz, 16kHz, and 9 additional bands spread across the spectrum). Each slider controls the gain of a corresponding BiquadFilterNode from the useAudioEngine hook, with a range of ±12dB and a default of 0dB. Use debounced onChange handlers (5–10ms delay) to update filter gains in real time. When an EQ slider is moved, emit an event to highlight any linked instrument controls. Style sliders with gold accents and glassmorphism."
+        },
+        {
+          "path": "frontend/src/utils/audioConstants.ts",
+          "operation": "create",
+          "description": "Define constants for the 20 EQ frequency bands (array of frequency values in Hz), gain range limits (±12dB), and mappings between EQ bands and instrument frequency ranges. Export these constants for use by Equalizer and InstrumentControls components."
+        }
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "summary": "Render 20 instrument sliders for Bass Guitar, Kick Drum, Snare, Hi-Hat, Piano, Violin, Cello, Trumpet, Saxophone, Flute, Acoustic Guitar, Electric Guitar, Synthesizer, Organ, Choir/Vocals, Strings, Percussion, Sub Bass, Cymbals, Harmonica; each slider boosts/cuts its characteristic EQ bands and updates linked EQ slider positions in real time",
+      "acceptanceCriteria": [
+        "All 20 instrument sliders are rendered with instrument name labels",
+        "Each instrument is mapped to a defined set of frequency bands",
+        "Moving an instrument slider adjusts the gain of its mapped BiquadFilterNodes and the corresponding EQ slider positions update visually",
+        "Audio effect is heard in real time"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/InstrumentControls.tsx",
+          "operation": "create",
+          "description": "Create an InstrumentControls component that renders 20 labeled sliders for the specified instruments: Bass Guitar, Kick Drum, Snare, Hi-Hat, Piano, Violin, Cello, Trumpet, Saxophone, Flute, Acoustic Guitar, Electric Guitar, Synthesizer, Organ, Choir/Vocals, Strings, Percussion, Sub Bass, Cymbals, Harmonica. Map each instrument to a set of EQ frequency bands (imported from audioConstants). When an instrument slider moves, update the gain of all mapped BiquadFilterNodes and emit an event to update the corresponding EQ slider positions visually. Use debounced onChange handlers. Style with gold accents and glassmorphism."
+        },
+        {
+          "path": "frontend/src/utils/instrumentMappings.ts",
+          "operation": "create",
+          "description": "Define mappings between each of the 20 instruments and their characteristic EQ frequency bands. Export this mapping object for use by InstrumentControls and Equalizer components to coordinate visual and audio updates."
+        }
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "summary": "Render a real-time canvas-based frequency spectrum visualizer that reads from the Web Audio API AnalyserNode and draws a live frequency spectrum in yellow using requestAnimationFrame",
+      "acceptanceCriteria": [
+        "A HTML canvas element renders inside the center panel",
+        "The visualizer draws frequency bar or waveform data from an AnalyserNode",
+        "Bars/waveform are rendered in gold/yellow (#FFD700)",
+        "Animation runs via requestAnimationFrame with no dropped frames during normal playback",
+        "Visualizer reacts to EQ changes visually"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/SpectrumVisualizer.tsx",
+          "operation": "create",
+          "description": "Create a SpectrumVisualizer component that renders an HTML canvas element. Access the AnalyserNode from the useAudioEngine hook and use getByteFrequencyData to read frequency data. Implement a requestAnimationFrame loop that draws frequency bars in gold/yellow (#FFD700) on the canvas. Clear and redraw the canvas on each frame. The visualizer should be active whenever audio is playing. Wire in the generated spectrum hero image from frontend/public/assets/generated/spectrum-hero.dim_800x200.png as a background or decorative element if desired. Apply glassmorphism styling to the canvas container."
+        },
+        {
+          "path": "frontend/src/hooks/useCanvasAnimation.ts",
+          "operation": "create",
+          "description": "Create a custom React hook useCanvasAnimation that sets up a requestAnimationFrame loop for the canvas visualizer. Provide start and stop methods to control the animation loop lifecycle."
+        }
+      ]
+    },
+    {
+      "id": "REQ-10",
+      "summary": "Implement the full Web Audio API audio engine with source → 20 BiquadFilterNodes → GainNode → AnalyserNode → destination, sound engine preset reconfiguration, debounced EQ/instrument changes, and graceful fallback for unsupported browsers",
+      "acceptanceCriteria": [
+        "AudioContext is created on first user interaction to comply with browser autoplay policy",
+        "Audio signal chain is: source → 20 BiquadFilterNodes → GainNode → AnalyserNode → destination",
+        "Sound engine presets change filter type/frequency/Q/gain values across the chain",
+        "EQ/instrument slider changes are debounced to prevent audible clicks",
+        "If AudioContext is unavailable, a visible fallback notice is shown instead of a broken UI"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useAudioEngine.ts",
+          "operation": "modify",
+          "description": "Expand the useAudioEngine hook to initialize the AudioContext on first user interaction (e.g., when a file is loaded or play is clicked). Set up the full signal chain: source node (MediaElementAudioSourceNode or AudioBufferSourceNode) → 20 BiquadFilterNodes in series → GainNode → AnalyserNode → destination. Implement sound engine preset functions that reconfigure filter parameters (type, frequency, Q, gain) for 'Crystal Engine', 'Deep Bass Engine', 'Surround Engine', and 'Pure HD Engine'. Export all nodes and provide methods to connect a source and update filters. Include a try-catch block to detect if Web Audio API is unavailable and return an error state."
+        },
+        {
+          "path": "frontend/src/components/AudioEngineFallback.tsx",
+          "operation": "create",
+          "description": "Create an AudioEngineFallback component that displays a styled error notice when the Web Audio API is unavailable. Show a message like 'Web Audio API is not supported in your browser. Please use a modern browser to enjoy ULTRASOUND PRO.' Style the notice with glassmorphism and gold accents."
+        },
+        {
+          "path": "frontend/src/utils/debounce.ts",
+          "operation": "create",
+          "description": "Create a utility function debounce that wraps EQ and instrument slider onChange handlers with a 5–10ms delay to prevent audio clicks/pops. Export this function for use in Equalizer and InstrumentControls components."
+        }
+      ]
+    },
+    {
+      "id": "REQ-11",
+      "summary": "Add React error boundaries around every major section (file picker, player, battery, EQ, instrument panel, visualizer) with styled fallback UI and 'Retry' button",
+      "acceptanceCriteria": [
+        "ErrorBoundary components wrap the file picker, player controls, battery widget, EQ section, instrument section, and visualizer canvas",
+        "On caught error, each boundary shows a styled error card with section name and a 'Retry' button",
+        "Clicking Retry resets the boundary state and re-renders the child component"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/ErrorBoundary.tsx",
+          "operation": "create",
+          "description": "Create a reusable ErrorBoundary class component that catches errors in its child tree. On error, render a styled fallback UI (glassmorphism card) displaying the section name and a 'Retry' button. Clicking Retry resets the error state and re-renders the children. Accept a sectionName prop for displaying which section failed."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Wrap each major section (FilePicker, Playlist, PlayerControls, BatteryWidget, Equalizer, InstrumentControls, SpectrumVisualizer) with an ErrorBoundary component. Pass a descriptive sectionName prop to each boundary (e.g., 'File Picker', 'Player Controls', 'Battery System', 'Equalizer', 'Instrument Controls', 'Spectrum Visualizer')."
+        }
+      ]
+    }
+  ]
+}
