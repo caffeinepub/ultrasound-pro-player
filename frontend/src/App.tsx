@@ -5,8 +5,7 @@ import { Playlist } from './components/Playlist';
 import { PlayerControls } from './components/PlayerControls';
 import { SpectrumVisualizer } from './components/SpectrumVisualizer';
 import { BatteryWidget } from './components/BatteryWidget';
-import { Equalizer } from './components/Equalizer';
-import { InstrumentControls } from './components/InstrumentControls';
+import { EQStabilizer } from './components/EQStabilizer';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { AudioEngineFallback } from './components/AudioEngineFallback';
 import { useAudioEngine } from './hooks/useAudioEngine';
@@ -14,7 +13,7 @@ import { useAudioFiles, AudioFile } from './hooks/useAudioFiles';
 import { useAudioPlayer } from './hooks/useAudioPlayer';
 import { useBatteryCharging } from './hooks/useBatteryCharging';
 import { SoundEngine, EQ_GAIN_DEFAULT, SOUND_ENGINE_PRESETS } from './utils/audioConstants';
-import { INSTRUMENTS } from './utils/instrumentMappings';
+import { INSTRUMENTS, BAND_INDEX_TO_INSTRUMENT_INDEX } from './utils/instrumentMappings';
 
 const INITIAL_EQ_GAINS = new Array(20).fill(EQ_GAIN_DEFAULT);
 const INITIAL_INSTRUMENT_GAINS = new Array(20).fill(0);
@@ -31,55 +30,80 @@ export default function App() {
   const [highlightedBands, setHighlightedBands] = useState<Set<number>>(new Set());
   const [highlightedInstruments, setHighlightedInstruments] = useState<Set<number>>(new Set());
 
-  const handleEngineSelect = useCallback((engine: SoundEngine) => {
-    setActiveEngine(engine);
-    audioEngine.setSoundEngine(engine);
-    setEqGains([...SOUND_ENGINE_PRESETS[engine]]);
-  }, [audioEngine]);
+  const handleEngineSelect = useCallback(
+    (engine: SoundEngine) => {
+      setActiveEngine(engine);
+      audioEngine.setSoundEngine(engine);
+      const preset = SOUND_ENGINE_PRESETS[engine];
+      setEqGains([...preset]);
+      // Sync instrument gains to match the preset (1-to-1)
+      const newInstGains = new Array(20).fill(0);
+      INSTRUMENTS.forEach((inst, instIdx) => {
+        const bandIdx = inst.bandIndices[0];
+        newInstGains[instIdx] = preset[bandIdx] ?? 0;
+      });
+      setInstrumentGains(newInstGains);
+    },
+    [audioEngine]
+  );
 
+  // When an EQ band slider moves → update that band's gain AND sync the linked instrument's gain
   const handleEqGainChange = useCallback((bandIndex: number, gain: number) => {
-    setEqGains(prev => {
+    setEqGains((prev) => {
       const next = [...prev];
       next[bandIndex] = gain;
       return next;
     });
 
-    // Highlight instruments linked to this band
-    const linked = new Set<number>();
-    INSTRUMENTS.forEach((inst, i) => {
-      if (inst.bandIndices.includes(bandIndex)) {
-        linked.add(i);
-      }
-    });
-    setHighlightedInstruments(linked);
-    setTimeout(() => setHighlightedInstruments(new Set()), 1500);
+    const instIdx = BAND_INDEX_TO_INSTRUMENT_INDEX[bandIndex];
+    if (instIdx >= 0) {
+      setInstrumentGains((prev) => {
+        const next = [...prev];
+        next[instIdx] = gain;
+        return next;
+      });
+      setHighlightedInstruments(new Set([instIdx]));
+      setTimeout(() => setHighlightedInstruments(new Set()), 1500);
+    }
   }, []);
 
+  // When an instrument slider moves → update that instrument's gain AND sync the linked EQ band
   const handleInstrumentChange = useCallback((instrumentIndex: number, gain: number) => {
-    setInstrumentGains(prev => {
+    setInstrumentGains((prev) => {
       const next = [...prev];
       next[instrumentIndex] = gain;
       return next;
     });
 
-    // Update EQ gains for linked bands
     const instrument = INSTRUMENTS[instrumentIndex];
-    setEqGains(prev => {
+    const bandIdx = instrument.bandIndices[0];
+    setEqGains((prev) => {
       const next = [...prev];
-      instrument.bandIndices.forEach(bandIdx => {
-        next[bandIdx] = gain;
-      });
+      next[bandIdx] = gain;
       return next;
     });
 
-    // Highlight linked EQ bands
-    setHighlightedBands(new Set(instrument.bandIndices));
+    setHighlightedBands(new Set([bandIdx]));
     setTimeout(() => setHighlightedBands(new Set()), 1500);
   }, []);
 
-  const handleTrackSelect = useCallback((file: AudioFile, index: number) => {
-    player.loadTrack(file, index);
-  }, [player]);
+  // Clicking a playlist item loads the track and auto-plays if battery is unlocked
+  const handleTrackSelect = useCallback(
+    (file: AudioFile, index: number) => {
+      // If same track is already loaded, just toggle play/pause
+      if (player.state.currentIndex === index && player.state.currentTrack) {
+        if (player.state.playbackState === 'playing') {
+          player.pause();
+        } else {
+          player.play();
+        }
+        return;
+      }
+      // Load new track — auto-play if unlocked
+      player.loadTrack(file, index, batteryState.isUnlocked);
+    },
+    [player, batteryState.isUnlocked]
+  );
 
   if (!audioEngine.state.isAvailable) {
     return (
@@ -92,7 +116,13 @@ export default function App() {
   const isPlaying = player.state.playbackState === 'playing';
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(135deg, #060918 0%, #0a0e2a 40%, #0d1440 70%, #060918 100%)' }}>
+    <div
+      className="min-h-screen flex flex-col"
+      style={{
+        background:
+          'linear-gradient(135deg, #060918 0%, #0a0e2a 40%, #0d1440 70%, #060918 100%)',
+      }}
+    >
       {/* Header */}
       <ErrorBoundary sectionName="Header">
         <Header activeEngine={activeEngine} onEngineSelect={handleEngineSelect} />
@@ -102,10 +132,7 @@ export default function App() {
       <main className="flex-1 flex flex-col lg:flex-row gap-4 p-4 min-h-0">
         {/* Left Panel: File Picker + Playlist */}
         <aside className="w-full lg:w-72 xl:w-80 shrink-0 flex flex-col gap-4">
-          <div
-            className="glass-panel p-4 flex flex-col gap-4"
-            style={{ minHeight: '200px' }}
-          >
+          <div className="glass-panel p-4 flex flex-col gap-4" style={{ minHeight: '200px' }}>
             <ErrorBoundary sectionName="File Picker">
               <FilePicker onFilesAdded={addFiles} error={fileError} />
             </ErrorBoundary>
@@ -115,6 +142,7 @@ export default function App() {
               <Playlist
                 files={files}
                 currentIndex={player.state.currentIndex}
+                playbackState={player.state.playbackState}
                 onSelect={handleTrackSelect}
                 onRemove={removeFile}
               />
@@ -137,6 +165,7 @@ export default function App() {
                 onNext={player.next}
                 onPrevious={player.previous}
                 onSeek={player.seek}
+                onClearError={player.clearError}
               />
             </ErrorBoundary>
           </div>
@@ -153,23 +182,16 @@ export default function App() {
         </section>
       </main>
 
-      {/* Bottom Panel: EQ + Instruments */}
-      <section className="p-4 flex flex-col gap-4">
-        <ErrorBoundary sectionName="Equalizer">
-          <Equalizer
+      {/* Bottom Panel: Unified EQ Stabilizer */}
+      <section className="p-4">
+        <ErrorBoundary sectionName="EQ Stabilizer">
+          <EQStabilizer
             audioEngine={audioEngine}
             eqGains={eqGains}
-            onGainChange={handleEqGainChange}
-            highlightedBands={highlightedBands}
-          />
-        </ErrorBoundary>
-
-        <ErrorBoundary sectionName="Instrument Controls">
-          <InstrumentControls
-            audioEngine={audioEngine}
             instrumentGains={instrumentGains}
-            eqGains={eqGains}
+            onEqGainChange={handleEqGainChange}
             onInstrumentChange={handleInstrumentChange}
+            highlightedBands={highlightedBands}
             highlightedInstruments={highlightedInstruments}
           />
         </ErrorBoundary>
@@ -181,17 +203,17 @@ export default function App() {
         style={{
           background: 'rgba(6,9,24,0.8)',
           borderTop: '1px solid rgba(255,215,0,0.1)',
-          color: 'rgba(255,255,255,0.3)'
+          color: 'rgba(255,255,255,0.3)',
         }}
       >
         <span>© {new Date().getFullYear()} ULTRASOUND PRO</span>
         <span style={{ color: 'rgba(255,215,0,0.3)' }}>·</span>
         <span className="flex items-center gap-1">
-          Built with{' '}
-          <span style={{ color: '#FFD700' }}>♥</span>{' '}
-          using{' '}
+          Built with <span style={{ color: '#FFD700' }}>♥</span> using{' '}
           <a
-            href={`https://caffeine.ai/?utm_source=Caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(typeof window !== 'undefined' ? window.location.hostname : 'ultrasound-pro')}`}
+            href={`https://caffeine.ai/?utm_source=Caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(
+              typeof window !== 'undefined' ? window.location.hostname : 'ultrasound-pro'
+            )}`}
             target="_blank"
             rel="noopener noreferrer"
             className="font-bold transition-colors"

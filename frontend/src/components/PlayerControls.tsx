@@ -1,4 +1,4 @@
-import { SkipBack, SkipForward, Play, Pause, Square, Music } from 'lucide-react';
+import { SkipBack, SkipForward, Play, Pause, Square, Music, X } from 'lucide-react';
 import { PlayerState } from '../hooks/useAudioPlayer';
 import { AudioFile } from '../hooks/useAudioFiles';
 
@@ -12,6 +12,7 @@ interface Props {
   onNext: () => void;
   onPrevious: () => void;
   onSeek: (time: number) => void;
+  onClearError: () => void;
 }
 
 function formatTime(seconds: number): string {
@@ -30,9 +31,10 @@ export function PlayerControls({
   onStop,
   onNext,
   onPrevious,
-  onSeek
+  onSeek,
+  onClearError,
 }: Props) {
-  const { playbackState, currentTime, duration, currentTrack } = playerState;
+  const { playbackState, currentTime, duration, currentTrack, playbackError } = playerState;
   const isPlaying = playbackState === 'playing';
   const hasTrack = !!currentTrack;
   const canControl = isUnlocked && hasTrack;
@@ -47,7 +49,7 @@ export function PlayerControls({
           style={{
             background: 'rgba(255,215,0,0.08)',
             border: '1px solid rgba(255,215,0,0.2)',
-            boxShadow: isPlaying ? '0 0 20px rgba(255,215,0,0.3)' : 'none'
+            boxShadow: isPlaying ? '0 0 20px rgba(255,215,0,0.3)' : 'none',
           }}
         >
           <Music size={28} style={{ color: isPlaying ? '#FFD700' : 'rgba(255,215,0,0.3)' }} />
@@ -56,7 +58,7 @@ export function PlayerControls({
               className="absolute inset-0 rounded-xl"
               style={{
                 background: 'radial-gradient(circle, rgba(255,215,0,0.1) 0%, transparent 70%)',
-                animation: 'pulse-gold 2s ease-in-out infinite'
+                animation: 'pulse-gold 2s ease-in-out infinite',
               }}
             />
           )}
@@ -77,16 +79,44 @@ export function PlayerControls({
             <span
               className="font-orbitron text-xs px-2 py-0.5 rounded"
               style={{
-                background: isPlaying ? 'rgba(0,255,127,0.15)' : 'rgba(255,255,255,0.05)',
+                background: isPlaying
+                  ? 'rgba(0,255,127,0.15)'
+                  : 'rgba(255,255,255,0.05)',
                 border: `1px solid ${isPlaying ? 'rgba(0,255,127,0.4)' : 'rgba(255,255,255,0.1)'}`,
-                color: isPlaying ? '#00FF7F' : 'rgba(255,255,255,0.3)'
+                color: isPlaying ? '#00FF7F' : 'rgba(255,255,255,0.3)',
               }}
             >
-              {isPlaying ? '● PLAYING' : playbackState === 'paused' ? '⏸ PAUSED' : '■ STOPPED'}
+              {isPlaying
+                ? '● PLAYING'
+                : playbackState === 'paused'
+                ? '⏸ PAUSED'
+                : '■ STOPPED'}
             </span>
           </div>
         </div>
       </div>
+
+      {/* Playback Error Banner */}
+      {playbackError && (
+        <div
+          className="flex items-center justify-between gap-2 px-3 py-2 rounded-lg font-rajdhani text-sm"
+          style={{
+            background: 'rgba(255,68,68,0.12)',
+            border: '1px solid rgba(255,68,68,0.35)',
+            color: '#FF8080',
+          }}
+        >
+          <span>⚠ {playbackError}</span>
+          <button
+            onClick={onClearError}
+            className="shrink-0 p-0.5 rounded hover:opacity-70 transition-opacity"
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#FF8080' }}
+            title="Dismiss"
+          >
+            <X size={14} />
+          </button>
+        </div>
+      )}
 
       {/* Seek Bar */}
       <div className="flex flex-col gap-1">
@@ -100,7 +130,7 @@ export function PlayerControls({
           className="seek-slider w-full"
           style={{
             accentColor: '#FFD700',
-            opacity: canControl ? 1 : 0.3
+            opacity: canControl ? 1 : 0.3,
           }}
         />
         <div className="flex justify-between">
@@ -159,7 +189,7 @@ export function PlayerControls({
           style={{
             background: 'rgba(255,68,68,0.1)',
             border: '1px solid rgba(255,68,68,0.3)',
-            color: '#FF6B6B'
+            color: '#FF6B6B',
           }}
         >
           🔒 Charge Battery to Unlock Music

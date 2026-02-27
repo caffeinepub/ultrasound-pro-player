@@ -2,68 +2,12 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-implement-the-global-visual-theme-deep-dark-blue-gradient-background-060918-to-0d1440-primary-gold-yellow-accent-ffd700-electric-blue-secondary-00bfff-glassmorphism-panels-rgba-255-255-255-0-05-with-backdrop-blur-neon-glow-effects-in-yellow-and-blue-ultra-premium-bold-typography-white-and-yellow-text-app-title-bar-reads-ultrasound-pro-with-a-glowing-logo-treatment",
-      "featureTitle": "Implement the global visual theme: deep dark blue gradient background (#060918 to #0d1440), primary gold/yellow accent (#FFD700), electric blue secondary (#00BFFF), glassmorphism panels (rgba(255,255,255,0.05) with backdrop-blur), neon glow effects in yellow and blue, ultra-premium bold typography (white and yellow text). App title bar reads 'ULTRASOUND PRO' with a glowing logo treatment.",
-      "files": [
-        "frontend/src/index.css",
-        "frontend/tailwind.config.js"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-1"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-build-a-layout-with-four-regions-1-top-header-bar-with-the-app-title-and-sound-engine-selector-2-left-panel-for-file-picker-playlist-3-center-panel-for-player-controls-spectrum-visualizer-and-battery-system-4-bottom-panel-for-the-20-band-eq-followed-by-the-20-instrument-controls",
-      "featureTitle": "Build a layout with four regions: (1) Top header bar with the app title and sound engine selector; (2) Left panel for file picker/playlist; (3) Center panel for player controls, spectrum visualizer, and battery system; (4) Bottom panel for the 20-band EQ followed by the 20 instrument controls.",
+      "featureId": "feature-fix-the-audio-playback-pipeline-so-that-when-a-user-selects-audio-files-via-the-file-picker-drag-and-drop-or-browse-and-clicks-a-track-in-the-playlist-the-audio-actually-plays-the-issue-is-that-files-can-be-selected-and-appear-in-the-playlist-but-clicking-play-or-selecting-a-track-does-not-produce-any-sound-ensure-the-object-url-created-from-the-selected-file-is-correctly-assigned-to-the-htmlaudioelement-src-the-audiocontext-is-resumed-it-may-be-in-suspended-state-due-to-browser-autoplay-policy-the-source-node-is-connected-to-the-audio-engine-filter-chain-and-the-play-promise-is-awaited-and-any-rejection-is-caught-and-logged",
+      "featureTitle": "Fix the audio playback pipeline so that when a user selects audio files via the file picker (drag-and-drop or browse) and clicks a track in the playlist, the audio actually plays. The issue is that files can be selected and appear in the playlist but clicking Play or selecting a track does not produce any sound. Ensure the object URL created from the selected File is correctly assigned to the HTMLAudioElement src, the AudioContext is resumed (it may be in 'suspended' state due to browser autoplay policy), the source node is connected to the audio engine filter chain, and the play() promise is awaited and any rejection is caught and logged.",
       "files": [
         "frontend/src/App.tsx",
-        "frontend/src/components/Header.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-2"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-implement-a-file-picker-modal-window-with-drag-and-drop-support-accepted-formats-mp3-wav-flac-ogg-aac-the-drop-zone-glows-yellow-on-hover-drag-over-after-files-are-selected-display-a-playlist-list-showing-song-name-duration-and-format-badge-clicking-a-song-in-the-list-loads-it-into-the-player",
-      "featureTitle": "Implement a file picker modal/window with drag-and-drop support. Accepted formats: MP3, WAV, FLAC, OGG, AAC. The drop zone glows yellow on hover/drag-over. After files are selected, display a playlist list showing song name, duration, and format badge. Clicking a song in the list loads it into the player.",
-      "files": [
-        "frontend/src/components/FilePicker.tsx",
-        "frontend/src/components/Playlist.tsx",
-        "frontend/src/hooks/useAudioFiles.ts"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-3"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-build-the-music-player-controls-play-pause-stop-next-previous-buttons-and-a-seek-bar-display-the-song-title-artist-parsed-from-file-metadata-or-filename-and-an-album-art-placeholder-all-player-controls-are-disabled-and-visually-locked-until-the-battery-reaches-100",
-      "featureTitle": "Build the music player controls: Play, Pause, Stop, Next, Previous buttons and a seek bar. Display the song title, artist (parsed from file metadata or filename), and an album art placeholder. All player controls are disabled and visually locked until the battery reaches 100%.",
-      "files": [
         "frontend/src/components/PlayerControls.tsx",
+        "frontend/src/hooks/useAudioEngine.ts",
         "frontend/src/hooks/useAudioPlayer.ts"
       ],
       "components": [
@@ -71,144 +15,32 @@
         "shadcn-ui@1.0.0",
         "build-template-react@1.0.0",
         "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0"
       ],
       "testIds": [
-        "REQ-4"
+        "REQ-24"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-implement-the-animated-battery-charging-system-show-a-large-battery-widget-with-labeled-capacity-of-80-000w-a-200-000w-charger-animates-with-lightning-bolt-and-electric-arc-svg-css-animations-battery-fill-rises-from-0-to-100-with-a-glowing-yellow-fill-animation-a-real-time-counter-displays-charging-x-w-200-000w-battery-percentage-is-displayed-in-large-text-while-charging-show-charging-music-locked-at-100-trigger-a-dramatic-unlock-animation-and-display-fully-charged-music-unlocked-battery-level-maps-to-an-output-power-x-watts-readout",
-      "featureTitle": "Implement the animated battery charging system. Show a large battery widget with labeled capacity of 80,000W. A 200,000W charger animates with lightning bolt and electric arc SVG/CSS animations. Battery fill rises from 0% to 100% with a glowing yellow fill animation. A real-time counter displays 'Charging: X W / 200,000W'. Battery percentage is displayed in large text. While charging, show 'CHARGING… Music Locked'. At 100%, trigger a dramatic unlock animation and display 'FULLY CHARGED — Music Unlocked!'. Battery level maps to an 'Output Power: X watts' readout.",
-      "files": [
-        "frontend/src/components/BatteryWidget.tsx",
-        "frontend/src/hooks/useBatteryCharging.ts"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-5"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-implement-a-4-option-sound-engine-selector-in-the-header-crystal-engine-deep-bass-engine-surround-engine-pure-hd-engine-each-preset-applies-a-distinct-web-audio-api-filter-chain-configuration-switching-engines-updates-the-audio-processing-in-real-time-with-no-audible-glitch",
-      "featureTitle": "Implement a 4-option sound engine selector in the header: 'Crystal Engine', 'Deep Bass Engine', 'Surround Engine', 'Pure HD Engine'. Each preset applies a distinct Web Audio API filter chain configuration. Switching engines updates the audio processing in real time with no audible glitch.",
-      "files": [
-        "frontend/src/components/SoundEngineSelector.tsx",
-        "frontend/src/hooks/useAudioEngine.ts"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-6"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-implement-a-20-band-equalizer-using-20-web-audio-api-biquadfilternodes-in-series-at-these-frequencies-20hz-40hz-80hz-160hz-250hz-500hz-1khz-2khz-4khz-8khz-16khz-and-9-additional-bands-spread-across-the-spectrum-to-total-20-each-band-has-a-vertical-slider-showing-12db-gain-moving-a-slider-instantly-updates-the-corresponding-biquadfilternode-gain-when-an-eq-band-is-adjusted-any-instrument-controls-linked-to-that-frequency-range-are-highlighted-visually",
-      "featureTitle": "Implement a 20-band equalizer using 20 Web Audio API BiquadFilterNodes in series at these frequencies: 20Hz, 40Hz, 80Hz, 160Hz, 250Hz, 500Hz, 1kHz, 2kHz, 4kHz, 8kHz, 16kHz, and 9 additional bands spread across the spectrum to total 20. Each band has a vertical slider showing ±12dB gain. Moving a slider instantly updates the corresponding BiquadFilterNode gain. When an EQ band is adjusted, any instrument controls linked to that frequency range are highlighted visually.",
-      "files": [
-        "frontend/src/components/Equalizer.tsx",
-        "frontend/src/utils/audioConstants.ts"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-7"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-render-20-instrument-sliders-below-the-eq-section-for-bass-guitar-kick-drum-snare-hi-hat-piano-violin-cello-trumpet-saxophone-flute-acoustic-guitar-electric-guitar-synthesizer-organ-choir-vocals-strings-percussion-sub-bass-cymbals-harmonica-each-instrument-slider-boosts-cuts-its-characteristic-eq-frequency-bands-simultaneously-moving-an-instrument-slider-visually-updates-the-linked-eq-band-sliders-in-real-time",
-      "featureTitle": "Render 20 instrument sliders below the EQ section for: Bass Guitar, Kick Drum, Snare, Hi-Hat, Piano, Violin, Cello, Trumpet, Saxophone, Flute, Acoustic Guitar, Electric Guitar, Synthesizer, Organ, Choir/Vocals, Strings, Percussion, Sub Bass, Cymbals, Harmonica. Each instrument slider boosts/cuts its characteristic EQ frequency bands simultaneously. Moving an instrument slider visually updates the linked EQ band sliders in real time.",
-      "files": [
-        "frontend/src/components/InstrumentControls.tsx",
-        "frontend/src/utils/instrumentMappings.ts"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-8"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-render-a-real-time-canvas-based-frequency-spectrum-visualizer-in-the-center-panel-it-reads-from-the-web-audio-api-analysernode-and-draws-a-live-frequency-spectrum-in-yellow-ffd700-using-requestanimationframe-the-visualizer-is-always-active-when-audio-is-playing",
-      "featureTitle": "Render a real-time canvas-based frequency spectrum visualizer in the center panel. It reads from the Web Audio API AnalyserNode and draws a live frequency spectrum in yellow (#FFD700) using requestAnimationFrame. The visualizer is always active when audio is playing.",
-      "files": [
-        "frontend/src/components/SpectrumVisualizer.tsx",
-        "frontend/src/hooks/useCanvasAnimation.ts"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-9"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-implement-the-full-web-audio-api-audio-engine-audiocontext-with-source-node-20-biquadfilternodes-in-series-gainnode-analysernode-destination-sound-engine-presets-reconfigure-filter-parameters-all-eq-and-instrument-changes-are-debounced-5-10ms-to-prevent-audio-clicks-pops-provide-a-graceful-fallback-message-if-web-audio-api-is-not-available-in-the-browser",
-      "featureTitle": "Implement the full Web Audio API audio engine: AudioContext with source node → 20 BiquadFilterNodes in series → GainNode → AnalyserNode → destination. Sound engine presets reconfigure filter parameters. All EQ and instrument changes are debounced (5–10ms) to prevent audio clicks/pops. Provide a graceful fallback message if Web Audio API is not available in the browser.",
-      "files": [
-        "frontend/src/components/AudioEngineFallback.tsx",
-        "frontend/src/hooks/useAudioEngine.ts",
-        "frontend/src/utils/debounce.ts"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-10"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-add-react-error-boundaries-around-every-major-section-file-picker-player-battery-eq-instrument-panel-visualizer-on-error-each-boundary-displays-a-styled-fallback-ui-with-a-retry-button-that-resets-the-component-state-and-attempts-re-render",
-      "featureTitle": "Add React error boundaries around every major section (file picker, player, battery, EQ, instrument panel, visualizer). On error, each boundary displays a styled fallback UI with a 'Retry' button that resets the component state and attempts re-render.",
+      "featureId": "feature-audit-and-fix-the-integration-between-useaudiofiles-ts-useaudioplayer-ts-and-useaudioengine-ts-in-app-tsx-to-ensure-the-full-data-flow-works-end-to-end-1-file-selection-object-url-creation-in-useaudiofiles-2-track-selection-src-assignment-on-the-htmlaudioelement-in-useaudioplayer-3-audiocontext-initialization-and-source-node-connection-in-useaudioengine-when-a-new-track-is-loaded-4-play-invocation-after-the-source-is-connected-fix-any-missing-wiring-incorrect-hook-dependency-or-race-condition-that-prevents-playback-from-starting",
+      "featureTitle": "Audit and fix the integration between useAudioFiles.ts, useAudioPlayer.ts, and useAudioEngine.ts in App.tsx to ensure the full data flow works end-to-end: (1) file selection → object URL creation in useAudioFiles, (2) track selection → src assignment on the HTMLAudioElement in useAudioPlayer, (3) AudioContext initialization and source node connection in useAudioEngine when a new track is loaded, (4) play() invocation after the source is connected. Fix any missing wiring, incorrect hook dependency, or race condition that prevents playback from starting.",
       "files": [
         "frontend/src/App.tsx",
-        "frontend/src/components/ErrorBoundary.tsx"
+        "frontend/src/hooks/useAudioEngine.ts",
+        "frontend/src/hooks/useAudioPlayer.ts"
       ],
       "components": [
         "core-infrastructure@1.0.2",
         "shadcn-ui@1.0.0",
         "build-template-react@1.0.0",
         "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0"
       ],
       "testIds": [
-        "REQ-11"
+        "REQ-25"
       ],
       "confidence": "high"
     }

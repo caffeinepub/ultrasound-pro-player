@@ -1,18 +1,21 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 3,
-  "summary": "Ultra-premium music player web app with dark blue/gold theme, file picker, Web Audio API player with battery charging lock system, 20-band EQ, 20 instrument controls, 4 sound engines, and canvas spectrum visualizer.",
+  "projectStateVersion": 19,
+  "summary": "Ultra-premium music player web app with dark blue/gold theme, file picker, Web Audio API player with battery charging lock system, combined 20-band EQ + 20 instrument controls panel where each EQ band slider is directly linked to one instrument — turning up an EQ band simultaneously boosts that instrument's sound. Instruments displayed with clean names/icons below the EQ row. 4 sound engines and canvas spectrum visualizer.",
   "architectural_notes": [
     "Single self-contained HTML file with embedded CSS and JavaScript",
     "Web Audio API used for all audio processing (BiquadFilterNode chains for 20-band EQ)",
     "Music playback locked until battery animation reaches 100% charge",
     "4 sound engine presets apply different EQ gain curves in real-time",
     "Canvas-based spectrum visualizer using requestAnimationFrame",
-    "Instrument sliders map to specific EQ frequency bands and update them bidirectionally"
+    "Each of the 20 EQ band sliders is 1-to-1 linked to one instrument — moving a band slider boosts/cuts both the frequency band AND that instrument's gain simultaneously"
   ],
-  "known_issues": [],
-  "isFixRequest": false,
-  "imageRequirements": "## Required Images\n- Glowing gold lightning bolt icon on dark transparent background, electric arc style (lightning-bolt-icon.dim_128x128.png)\n- Abstract sound wave / audio spectrum graphic in gold and electric blue on transparent background (spectrum-hero.dim_800x200.png)\n- Premium circular speaker grille / woofer illustration in gold on deep dark blue (speaker-logo.dim_256x256.png)",
+  "known_issues": [
+    "Instrument names/gain sliders are crammed inside EQ columns and hard to read/use — needs clean separate instrument row below EQ",
+    "EQ Stabilizer panel is too large — needs to be reshaped into 4 rows of 5 bands each to reduce height/size",
+    "File picker window does not trigger audio playback — files can be selected but music does not play"
+  ],
+  "isFixRequest": true,
   "existing_features": [
     {
       "id": "feature-implement-the-global-visual-theme-deep-dark-blue-gradient-background-060918-to-0d1440-primary-gold-yellow-accent-ffd700-electric-blue-secondary-00bfff-glassmorphism-panels-rgba-255-255-255-0-05-with-backdrop-blur-neon-glow-effects-in-yellow-and-blue-ultra-premium-bold-typography-white-and-yellow-text-app-title-bar-reads-ultrasound-pro-with-a-glowing-logo-treatment",
@@ -101,9 +104,157 @@
         "REQ-11"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-merge-the-20-instrument-sliders-directly-inside-the-20-band-eq-panel-so-they-form-a-single-unified-equalizer-stabilizer-control-section-each-eq-frequency-band-column-should-display-its-vertical-gain-slider-at-the-top-and-its-associated-instrument-control-s-embedded-below-it-within-the-same-column-instrument-emoji-name-label-and-instrument-gain-slider-all-rendered-inside-the-eq-band-column-remove-the-separate-instrumentcontrols-section-from-the-bottom-panel-the-combined-panel-is-titled-eq-stabilizer-full-system-control-bidirectional-linking-remains-moving-an-instrument-slider-updates-its-linked-eq-band-sliders-in-real-time-and-moving-an-eq-band-slider-highlights-its-linked-instrument-controls",
+      "title": "Merge the 20 instrument sliders directly inside the 20-band EQ panel so they form a single unified 'Equalizer Stabilizer' control section. Each EQ frequency band column should display its vertical gain slider at the top and its associated instrument control(s) embedded below it within the same column — instrument emoji, name label, and instrument gain slider all rendered inside the EQ band column. Remove the separate InstrumentControls section from the bottom panel. The combined panel is titled 'EQ STABILIZER — Full System Control'. Bidirectional linking remains: moving an instrument slider updates its linked EQ band sliders in real time, and moving an EQ band slider highlights its linked instrument controls.",
+      "reqIds": [
+        "REQ-12"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-redesign-the-eqstabilizer-panel-layout-to-match-the-reference-screenshot-second-uploaded-image-render-the-20-eq-band-columns-horizontally-in-a-grid-where-each-column-contains-a-vertical-gain-slider-at-the-top-the-frequency-label-at-the-bottom-and-the-instrument-emoji-short-name-label-instrument-gain-slider-embedded-below-the-eq-slider-all-within-the-same-column-card-the-panel-must-scroll-horizontally-so-all-20-bands-are-accessible-each-column-card-uses-the-dark-glassmorphism-style-with-a-visible-vertical-slider-track",
+      "title": "Redesign the EQStabilizer panel layout to match the reference screenshot (second uploaded image): render the 20 EQ band columns horizontally in a grid where each column contains a vertical gain slider at the top, the frequency label at the bottom, and the instrument emoji + short name label + instrument gain slider embedded below the EQ slider — all within the same column card. The panel must scroll horizontally so all 20 bands are accessible. Each column card uses the dark glassmorphism style with a visible vertical slider track.",
+      "reqIds": [
+        "REQ-13"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-legend-boost-cut-indicator-bar-above-the-eq-stabilizer-panel-showing-a-yellow-dot-for-boost-a-blue-dot-for-cut-and-a-grey-dot-for-0-db-center-matching-the-reference-screenshot-style",
+      "title": "Add a legend/boost-cut indicator bar above the EQ Stabilizer panel showing: a yellow dot for 'Boost ↑', a blue dot for 'Cut ↓', and a grey dot for '0 dB center', matching the reference screenshot style.",
+      "reqIds": [
+        "REQ-14"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-footer-attribution-line-at-the-bottom-of-the-eq-stabilizer-panel-reading-designed-by-app-name-20-band-instrument-eq-connected-to-audio-chain-in-small-muted-uppercase-text-matching-the-reference-screenshot",
+      "title": "Add a footer attribution line at the bottom of the EQ Stabilizer panel reading 'DESIGNED BY [APP NAME] · 20-BAND INSTRUMENT EQ · CONNECTED TO AUDIO CHAIN' in small muted uppercase text, matching the reference screenshot.",
+      "reqIds": [
+        "REQ-15"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-replace-the-plain-text-emoji-used-for-each-instrument-inside-the-eq-stabilizer-band-columns-with-small-illustrated-instrument-icons-rendered-as-inline-svg-or-canvas-drawn-illustrations-that-visually-match-the-style-of-the-reference-image-colorful-cartoon-style-instrument-drawings-each-of-the-20-eq-band-column-cards-must-display-a-distinct-instrument-illustration-accordion-harmonica-harp-acoustic-guitar-electric-guitar-mandolin-banjo-tambourine-keyboard-maracas-conga-bagpipes-bongo-drums-sitar-cymbals-saxophone-violin-viola-cello-trumpet-trombone-french-horn-tuba-mapped-to-the-20-instrument-slots-already-defined-in-instruments-array-instrumentmappings-ts-the-illustrations-must-be-small-enough-to-fit-within-the-column-card-max-48-48px-display-size-and-maintain-the-dark-glassmorphism-card-style-the-instrument-name-label-below-the-icon-must-remain-visible",
+      "title": "Replace the plain text emoji used for each instrument inside the EQ Stabilizer band columns with small illustrated instrument icons rendered as inline SVG or canvas-drawn illustrations that visually match the style of the reference image (colorful, cartoon-style instrument drawings). Each of the 20 EQ band column cards must display a distinct instrument illustration — Accordion/Harmonica, Harp, Acoustic Guitar, Electric Guitar, Mandolin, Banjo, Tambourine, Keyboard, Maracas, Conga, Bagpipes, Bongo Drums, Sitar, Cymbals, Saxophone, Violin, Viola, Cello, Trumpet/Trombone, French Horn/Tuba — mapped to the 20 instrument slots already defined in INSTRUMENTS array (instrumentMappings.ts). The illustrations must be small enough to fit within the column card (max ~48×48px display size) and maintain the dark glassmorphism card style. The instrument name label below the icon must remain visible.",
+      "reqIds": [
+        "REQ-16"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-redesign-the-eq-stabilizer-panel-so-that-each-of-the-20-eq-band-column-cards-displays-1-a-vertical-eq-gain-slider-at-the-top-of-the-card-2-the-illustrated-instrument-icon-colorful-cartoon-style-svg-matching-the-reference-image-instruments-accordion-harp-acoustic-guitar-electric-guitar-mandolin-banjo-tambourine-keyboard-maracas-conga-bagpipes-bongo-drums-sitar-cymbals-saxophone-violin-viola-cello-trumpet-trombone-french-horn-tuba-centered-and-clearly-visible-below-the-eq-slider-3-the-instrument-short-name-label-in-clean-readable-text-below-the-icon-4-the-instrument-gain-turnup-slider-rendered-clearly-and-accessibly-below-the-name-label-all-within-the-same-glassmorphism-column-card-the-instrument-name-and-its-gain-slider-must-not-be-cramped-or-buried-they-must-be-legibly-sized-and-easy-to-interact-with-on-mobile",
+      "title": "Redesign the EQ Stabilizer panel so that each of the 20 EQ band column cards displays: (1) a vertical EQ gain slider at the top of the card, (2) the illustrated instrument icon (colorful cartoon-style SVG matching the reference image instruments: Accordion, Harp, Acoustic Guitar, Electric Guitar, Mandolin, Banjo, Tambourine, Keyboard, Maracas, Conga, Bagpipes, Bongo Drums, Sitar, Cymbals, Saxophone, Violin, Viola, Cello, Trumpet/Trombone, French Horn/Tuba) centered and clearly visible below the EQ slider, (3) the instrument short name label in clean readable text below the icon, (4) the instrument gain (turnup) slider rendered clearly and accessibly below the name label — all within the same glassmorphism column card. The instrument name and its gain slider must NOT be cramped or buried; they must be legibly sized and easy to interact with on mobile.",
+      "reqIds": [
+        "REQ-17"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-restructure-the-eq-stabilizer-panel-into-two-clearly-separated-horizontal-rows-1-the-top-row-displays-all-20-eq-band-columns-each-containing-only-the-vertical-gain-slider-and-the-frequency-label-no-instrument-content-inside-these-columns-2-directly-below-the-eq-row-render-a-dedicated-instrument-controls-row-with-20-instrument-cards-aligned-to-their-corresponding-eq-band-columns-each-instrument-card-displays-the-illustrated-svg-instrument-icon-the-instrument-short-name-in-legible-text-and-a-horizontal-or-vertical-instrument-gain-slider-that-is-large-enough-to-interact-with-comfortably-on-mobile-min-44px-touch-target-the-two-rows-must-be-visually-connected-same-horizontal-scroll-container-same-column-widths-so-each-instrument-card-sits-directly-beneath-its-linked-eq-band-bidirectional-linking-is-preserved-adjusting-an-instrument-gain-slider-updates-its-linked-eq-band-gains-in-real-time-and-adjusting-an-eq-band-slider-highlights-its-linked-instrument-card",
+      "title": "Restructure the EQ Stabilizer panel into two clearly separated horizontal rows: (1) The top row displays all 20 EQ band columns, each containing only the vertical gain slider and the frequency label — no instrument content inside these columns. (2) Directly below the EQ row, render a dedicated Instrument Controls row with 20 instrument cards aligned to their corresponding EQ band columns. Each instrument card displays the illustrated SVG instrument icon, the instrument short name in legible text, and a horizontal or vertical instrument gain slider that is large enough to interact with comfortably on mobile (min 44px touch target). The two rows must be visually connected (same horizontal scroll container, same column widths) so each instrument card sits directly beneath its linked EQ band. Bidirectional linking is preserved: adjusting an instrument gain slider updates its linked EQ band gains in real time, and adjusting an EQ band slider highlights its linked instrument card.",
+      "reqIds": [
+        "REQ-18"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-redesign-the-eq-stabilizer-so-that-each-of-the-20-eq-band-sliders-is-exclusively-and-directly-linked-to-exactly-one-instrument-one-band-one-instrument-no-sharing-the-20-instruments-must-be-remapped-so-each-eq-frequency-band-owns-one-instrument-from-this-list-matching-the-reference-image-accordion-harp-acoustic-guitar-electric-guitar-mandolin-banjo-tambourine-keyboard-maracas-conga-bagpipes-bongo-drums-sitar-cymbals-saxophone-violin-viola-cello-trombone-french-horn-one-per-band-in-order-from-lowest-to-highest-frequency-update-instrumentmappings-ts-so-each-instrument-maps-to-exactly-one-eq-band-index-no-overlapping-bands-across-instruments",
+      "title": "Redesign the EQ Stabilizer so that each of the 20 EQ band sliders is exclusively and directly linked to exactly one instrument — one band = one instrument, no sharing. The 20 instruments must be remapped so each EQ frequency band owns one instrument from this list (matching the reference image): Accordion, Harp, Acoustic Guitar, Electric Guitar, Mandolin, Banjo, Tambourine, Keyboard, Maracas, Conga, Bagpipes, Bongo Drums, Sitar, Cymbals, Saxophone, Violin, Viola, Cello, Trombone, French Horn — one per band, in order from lowest to highest frequency. Update `instrumentMappings.ts` so each instrument maps to exactly one EQ band index (no overlapping bands across instruments).",
+      "reqIds": [
+        "REQ-19"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-display-the-instrument-name-and-its-illustrated-svg-icon-colorful-cartoon-style-matching-the-reference-image-cleanly-below-each-eq-band-column-one-instrument-name-icon-per-column-horizontally-readable-not-rotated-and-clearly-associated-with-its-eq-slider-the-instrument-row-must-sit-in-a-clearly-separated-area-directly-beneath-the-eq-slider-row-within-the-same-horizontal-scroll-container-with-column-widths-aligned-so-each-instrument-card-sits-directly-under-its-eq-band-instrument-gain-slider-must-be-large-enough-to-interact-with-on-mobile-min-44px-touch-target",
+      "title": "Display the instrument name and its illustrated SVG icon (colorful cartoon-style matching the reference image) cleanly below each EQ band column — one instrument name/icon per column, horizontally readable (not rotated), and clearly associated with its EQ slider. The instrument row must sit in a clearly separated area directly beneath the EQ slider row within the same horizontal scroll container, with column widths aligned so each instrument card sits directly under its EQ band. Instrument gain slider must be large enough to interact with on mobile (min 44px touch target).",
+      "reqIds": [
+        "REQ-20"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-wire-the-audio-engine-so-that-when-an-eq-band-slider-is-moved-the-web-audio-api-biquadfilternode-gain-for-that-band-is-updated-and-the-master-gain-contribution-for-the-exclusively-linked-instrument-is-also-boosted-or-cut-proportionally-when-an-instrument-gain-slider-is-moved-both-the-instrument-s-contribution-and-its-linked-biquadfilternode-gain-are-updated-this-must-be-audibly-perceptible-turning-up-band-1-20hz-must-make-the-accordion-louder-in-the-mix-turning-it-down-must-reduce-it",
+      "title": "Wire the audio engine so that when an EQ band slider is moved, the Web Audio API BiquadFilterNode gain for that band is updated AND the master gain contribution for the exclusively linked instrument is also boosted or cut proportionally. When an instrument gain slider is moved, both the instrument's contribution AND its linked BiquadFilterNode gain are updated. This must be audibly perceptible — turning up band 1 (20Hz) must make the Accordion louder in the mix, turning it down must reduce it.",
+      "reqIds": [
+        "REQ-21"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-reshape-the-eq-stabilizer-panel-in-eqstabilizer-tsx-so-that-the-20-eq-band-columns-are-arranged-in-4-rows-of-5-columns-each-bands-1-5-6-10-11-15-16-20-from-top-to-bottom-replacing-the-current-single-horizontally-scrolling-row-each-column-card-retains-its-vertical-eq-gain-slider-and-frequency-label-the-panel-must-no-longer-require-horizontal-scrolling-all-20-bands-must-be-visible-within-the-panel-s-vertical-layout-the-overall-panel-height-and-width-must-be-compact-enough-to-fit-comfortably-on-screen-without-being-oversized",
+      "title": "Reshape the EQ Stabilizer panel in EQStabilizer.tsx so that the 20 EQ band columns are arranged in 4 rows of 5 columns each (bands 1–5, 6–10, 11–15, 16–20 from top to bottom), replacing the current single horizontally-scrolling row. Each column card retains its vertical EQ gain slider and frequency label. The panel must no longer require horizontal scrolling — all 20 bands must be visible within the panel's vertical layout. The overall panel height and width must be compact enough to fit comfortably on screen without being oversized.",
+      "reqIds": [
+        "REQ-22"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-align-the-instrument-cards-row-beneath-the-eq-grid-to-also-use-a-4-rows-of-5-layout-matching-the-eq-band-grid-exactly-each-instrument-card-sits-visually-below-its-corresponding-eq-band-column-grouped-in-the-same-4-5-arrangement-the-instrument-cards-svg-icon-name-label-gain-slider-with-min-44px-touch-target-must-remain-readable-and-interactable-within-this-compact-layout",
+      "title": "Align the instrument cards row beneath the EQ grid to also use a 4-rows-of-5 layout, matching the EQ band grid exactly — each instrument card sits visually below its corresponding EQ band column, grouped in the same 4×5 arrangement. The instrument cards (SVG icon, name label, gain slider with min 44px touch target) must remain readable and interactable within this compact layout.",
+      "reqIds": [
+        "REQ-23"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-the-audio-playback-pipeline-so-that-when-a-user-selects-audio-files-via-the-file-picker-drag-and-drop-or-browse-and-clicks-a-track-in-the-playlist-the-audio-actually-plays-the-issue-is-that-files-can-be-selected-and-appear-in-the-playlist-but-clicking-play-or-selecting-a-track-does-not-produce-any-sound-ensure-the-object-url-created-from-the-selected-file-is-correctly-assigned-to-the-htmlaudioelement-src-the-audiocontext-is-resumed-it-may-be-in-suspended-state-due-to-browser-autoplay-policy-the-source-node-is-connected-to-the-audio-engine-filter-chain-and-the-play-promise-is-awaited-and-any-rejection-is-caught-and-logged",
+      "title": "Fix the audio playback pipeline so that when a user selects audio files via the file picker (drag-and-drop or browse) and clicks a track in the playlist, the audio actually plays. The issue is that files can be selected and appear in the playlist but clicking Play or selecting a track does not produce any sound. Ensure the object URL created from the selected File is correctly assigned to the HTMLAudioElement src, the AudioContext is resumed (it may be in 'suspended' state due to browser autoplay policy), the source node is connected to the audio engine filter chain, and the play() promise is awaited and any rejection is caught and logged.",
+      "reqIds": [
+        "REQ-24"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-audit-and-fix-the-integration-between-useaudiofiles-ts-useaudioplayer-ts-and-useaudioengine-ts-in-app-tsx-to-ensure-the-full-data-flow-works-end-to-end-1-file-selection-object-url-creation-in-useaudiofiles-2-track-selection-src-assignment-on-the-htmlaudioelement-in-useaudioplayer-3-audiocontext-initialization-and-source-node-connection-in-useaudioengine-when-a-new-track-is-loaded-4-play-invocation-after-the-source-is-connected-fix-any-missing-wiring-incorrect-hook-dependency-or-race-condition-that-prevents-playback-from-starting",
+      "title": "Audit and fix the integration between useAudioFiles.ts, useAudioPlayer.ts, and useAudioEngine.ts in App.tsx to ensure the full data flow works end-to-end: (1) file selection → object URL creation in useAudioFiles, (2) track selection → src assignment on the HTMLAudioElement in useAudioPlayer, (3) AudioContext initialization and source node connection in useAudioEngine when a new track is loaded, (4) play() invocation after the source is connected. Fix any missing wiring, incorrect hook dependency, or race condition that prevents playback from starting.",
+      "reqIds": [
+        "REQ-25"
+      ],
+      "version": 1
     }
   ],
-  "new_feature_requests": [],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Merge the 20 instrument sliders inside the 20-band EQ panel so they are visually and functionally integrated as a single combined equalizer/stabilizer control system",
+      "reqIds": [
+        "REQ-7",
+        "REQ-8"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Redesign instrument controls: show instrument names/icons as a clean separate row below the EQ with clearly accessible turnup (gain) sliders, not cramped inside EQ columns",
+      "reqIds": [
+        "REQ-8",
+        "REQ-12",
+        "REQ-13"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Each EQ band slider is directly and exclusively linked to one instrument — turning up a band slider simultaneously boosts that instrument's audio contribution. Instrument names/icons displayed cleanly below the EQ, one per column, aligned to their EQ band.",
+      "reqIds": [
+        "REQ-7",
+        "REQ-8",
+        "REQ-18"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Reshape the EQ Stabilizer panel into 4 rows of 5 columns each (top and bottom), reducing the overall size so it fits better on screen without being too large",
+      "reqIds": [],
+      "status": "pending"
+    }
+  ],
   "gameProjectType": "none",
   "projectName": "UltraSound Pro",
   "clarification_mode": "instant",

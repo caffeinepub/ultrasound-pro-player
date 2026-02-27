@@ -8,7 +8,7 @@ export interface AudioEngineState {
 }
 
 export interface AudioEngineControls {
-  initializeContext: () => AudioContext | null;
+  initializeContext: () => Promise<AudioContext | null>;
   connectSource: (element: HTMLAudioElement) => void;
   disconnectSource: () => void;
   setFilterGain: (bandIndex: number, gainDb: number) => void;
@@ -29,23 +29,34 @@ export function useAudioEngine(): AudioEngineControls {
   const filterGainsRef = useRef<number[]>(new Array(20).fill(0));
 
   const [state, setState] = useState<AudioEngineState>({
-    isAvailable: typeof AudioContext !== 'undefined' || typeof (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext !== 'undefined',
+    isAvailable:
+      typeof AudioContext !== 'undefined' ||
+      typeof (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext !==
+        'undefined',
     isInitialized: false,
-    error: null
+    error: null,
   });
 
-  const initializeContext = useCallback((): AudioContext | null => {
+  const initializeContext = useCallback(async (): Promise<AudioContext | null> => {
+    // If context already exists, resume it if suspended and return it
     if (audioContextRef.current) {
-      if (audioContextRef.current.state === 'suspended') {
-        audioContextRef.current.resume();
+      const ctx = audioContextRef.current;
+      if (ctx.state === 'suspended') {
+        try {
+          await ctx.resume();
+        } catch (e) {
+          console.warn('Failed to resume AudioContext:', e);
+        }
       }
-      return audioContextRef.current;
+      return ctx;
     }
 
     try {
-      const AudioCtx = window.AudioContext || (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+      const AudioCtx =
+        window.AudioContext ||
+        (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
       if (!AudioCtx) {
-        setState(s => ({ ...s, isAvailable: false, error: 'Web Audio API not supported' }));
+        setState((s) => ({ ...s, isAvailable: false, error: 'Web Audio API not supported' }));
         return null;
       }
 
@@ -81,7 +92,7 @@ export function useAudioEngine(): AudioEngineControls {
       analyser.smoothingTimeConstant = 0.8;
       analyserRef.current = analyser;
 
-      // Connect filter chain: filters[0] -> filters[1] -> ... -> filters[19] -> gainNode -> analyser -> destination
+      // Connect filter chain: filters[0] -> ... -> filters[19] -> gainNode -> analyser -> destination
       for (let i = 0; i < filters.length - 1; i++) {
         filters[i].connect(filters[i + 1]);
       }
@@ -89,47 +100,64 @@ export function useAudioEngine(): AudioEngineControls {
       gainNode.connect(analyser);
       analyser.connect(ctx.destination);
 
+      // Resume immediately if suspended (browser autoplay policy)
+      if (ctx.state === 'suspended') {
+        try {
+          await ctx.resume();
+        } catch (e) {
+          console.warn('AudioContext resume failed on init:', e);
+        }
+      }
+
       setState({ isAvailable: true, isInitialized: true, error: null });
       return ctx;
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Failed to initialize audio engine';
-      setState(s => ({ ...s, error: msg }));
+      setState((s) => ({ ...s, error: msg }));
       return null;
     }
   }, []);
 
-  const connectSource = useCallback((element: HTMLAudioElement) => {
-    const ctx = initializeContext();
-    if (!ctx || !filtersRef.current.length) return;
+  const connectSource = useCallback(
+    (element: HTMLAudioElement) => {
+      const ctx = audioContextRef.current;
+      if (!ctx || !filtersRef.current.length) return;
 
-    // If same element already connected, skip
-    if (currentElementRef.current === element && sourceNodeRef.current) {
-      return;
-    }
+      // If same element already connected, skip — the MediaElementSourceNode follows the element's src
+      if (currentElementRef.current === element && sourceNodeRef.current) {
+        return;
+      }
 
-    // Disconnect previous source
-    if (sourceNodeRef.current) {
+      // Disconnect previous source if it was a different element
+      if (sourceNodeRef.current) {
+        try {
+          sourceNodeRef.current.disconnect();
+        } catch (_) {
+          /* ignore */
+        }
+        sourceNodeRef.current = null;
+        currentElementRef.current = null;
+      }
+
       try {
-        sourceNodeRef.current.disconnect();
-      } catch (_) { /* ignore */ }
-    }
-
-    try {
-      const source = ctx.createMediaElementSource(element);
-      sourceNodeRef.current = source;
-      currentElementRef.current = element;
-      source.connect(filtersRef.current[0]);
-    } catch (err) {
-      // Element might already be connected to a different context
-      console.warn('Could not connect audio source:', err);
-    }
-  }, [initializeContext]);
+        const source = ctx.createMediaElementSource(element);
+        sourceNodeRef.current = source;
+        currentElementRef.current = element;
+        source.connect(filtersRef.current[0]);
+      } catch (err) {
+        console.warn('Could not connect audio source:', err);
+      }
+    },
+    []
+  );
 
   const disconnectSource = useCallback(() => {
     if (sourceNodeRef.current) {
       try {
         sourceNodeRef.current.disconnect();
-      } catch (_) { /* ignore */ }
+      } catch (_) {
+        /* ignore */
+      }
       sourceNodeRef.current = null;
       currentElementRef.current = null;
     }
@@ -156,12 +184,15 @@ export function useAudioEngine(): AudioEngineControls {
     });
   }, []);
 
-  const setSoundEngine = useCallback((engine: SoundEngine) => {
-    const preset = SOUND_ENGINE_PRESETS[engine];
-    if (preset) {
-      setMultipleFilterGains(preset);
-    }
-  }, [setMultipleFilterGains]);
+  const setSoundEngine = useCallback(
+    (engine: SoundEngine) => {
+      const preset = SOUND_ENGINE_PRESETS[engine];
+      if (preset) {
+        setMultipleFilterGains(preset);
+      }
+    },
+    [setMultipleFilterGains]
+  );
 
   const getAnalyser = useCallback(() => analyserRef.current, []);
 
@@ -176,6 +207,6 @@ export function useAudioEngine(): AudioEngineControls {
     setSoundEngine,
     getAnalyser,
     getFilterGains,
-    state
+    state,
   };
 }
