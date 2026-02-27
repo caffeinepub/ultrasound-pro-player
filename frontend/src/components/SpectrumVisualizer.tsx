@@ -1,15 +1,14 @@
-import { useRef, useEffect, useCallback } from 'react';
-import { AudioEngineControls } from '../hooks/useAudioEngine';
+import React, { useRef, useEffect, useCallback } from 'react';
+import { AudioEngine } from '../hooks/useAudioEngine';
 
 interface Props {
-  audioEngine: AudioEngineControls;
+  audioEngine: AudioEngine;
   isPlaying: boolean;
 }
 
-export function SpectrumVisualizer({ audioEngine, isPlaying }: Props) {
+export default function SpectrumVisualizer({ audioEngine, isPlaying }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rafRef = useRef<number | null>(null);
-  const isRunningRef = useRef(false);
 
   const draw = useCallback(() => {
     const canvas = canvasRef.current;
@@ -17,20 +16,23 @@ export function SpectrumVisualizer({ audioEngine, isPlaying }: Props) {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const analyser = audioEngine.getAnalyser();
-    const width = canvas.width;
-    const height = canvas.height;
+    const analyser = audioEngine.getAnalyserNode();
+    const W = canvas.width;
+    const H = canvas.height;
 
-    ctx.clearRect(0, 0, width, height);
+    ctx.clearRect(0, 0, W, H);
 
-    if (!analyser) {
-      // Draw idle waveform
-      ctx.strokeStyle = 'rgba(255,215,0,0.2)';
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.moveTo(0, height / 2);
-      ctx.lineTo(width, height / 2);
-      ctx.stroke();
+    if (!analyser || !isPlaying) {
+      // Draw idle bars
+      const barCount = 64;
+      const barW = (W / barCount) * 0.7;
+      const gap = (W / barCount) * 0.3;
+      for (let i = 0; i < barCount; i++) {
+        const x = i * (barW + gap);
+        const h = 2 + Math.random() * 3;
+        ctx.fillStyle = 'rgba(255,215,0,0.15)';
+        ctx.fillRect(x, H - h, barW, h);
+      }
       return;
     }
 
@@ -38,112 +40,49 @@ export function SpectrumVisualizer({ audioEngine, isPlaying }: Props) {
     const dataArray = new Uint8Array(bufferLength);
     analyser.getByteFrequencyData(dataArray);
 
-    const barWidth = (width / bufferLength) * 2.5;
-    let x = 0;
+    const barCount = 64;
+    const step = Math.floor(bufferLength / barCount);
+    const barW = (W / barCount) * 0.7;
+    const gap = (W / barCount) * 0.3;
 
-    for (let i = 0; i < bufferLength; i++) {
-      const barHeight = (dataArray[i] / 255) * height;
-      const intensity = dataArray[i] / 255;
+    for (let i = 0; i < barCount; i++) {
+      const value = dataArray[i * step] / 255;
+      const h = value * H;
+      const x = i * (barW + gap);
 
-      // Gold to blue gradient based on intensity
-      const r = Math.floor(255 * intensity + 0 * (1 - intensity));
-      const g = Math.floor(215 * intensity + 191 * (1 - intensity));
-      const b = Math.floor(0 * intensity + 255 * (1 - intensity));
+      // Color gradient: gold for high, blue for low
+      const r = Math.round(255 * value + 0 * (1 - value));
+      const g = Math.round(215 * value + 191 * (1 - value));
+      const b = Math.round(0 * value + 255 * (1 - value));
 
-      ctx.fillStyle = `rgba(${r},${g},${b},${0.6 + intensity * 0.4})`;
-
-      // Draw bar with glow
-      ctx.shadowColor = `rgba(${r},${g},${b},0.8)`;
-      ctx.shadowBlur = 4;
-      ctx.fillRect(x, height - barHeight, barWidth - 1, barHeight);
-
-      x += barWidth;
-      if (x > width) break;
+      ctx.shadowBlur = 8;
+      ctx.shadowColor = `rgb(${r},${g},${b})`;
+      ctx.fillStyle = `rgb(${r},${g},${b})`;
+      ctx.fillRect(x, H - h, barW, h);
     }
-
-    // Draw top line
     ctx.shadowBlur = 0;
-    ctx.strokeStyle = 'rgba(255,215,0,0.15)';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.lineTo(width, 0);
-    ctx.stroke();
-  }, [audioEngine]);
+  }, [audioEngine, isPlaying]);
 
-  const startLoop = useCallback(() => {
-    if (isRunningRef.current) return;
-    isRunningRef.current = true;
+  useEffect(() => {
     const loop = () => {
-      if (!isRunningRef.current) return;
       draw();
       rafRef.current = requestAnimationFrame(loop);
     };
     rafRef.current = requestAnimationFrame(loop);
+    return () => {
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+    };
   }, [draw]);
 
-  const stopLoop = useCallback(() => {
-    isRunningRef.current = false;
-    if (rafRef.current) {
-      cancelAnimationFrame(rafRef.current);
-      rafRef.current = null;
-    }
-  }, []);
-
-  useEffect(() => {
-    // Always run the visualizer loop
-    startLoop();
-    return () => stopLoop();
-  }, [startLoop, stopLoop]);
-
-  // Resize canvas to match container
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const resizeObserver = new ResizeObserver(() => {
-      canvas.width = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
-    });
-    resizeObserver.observe(canvas);
-    canvas.width = canvas.offsetWidth;
-    canvas.height = canvas.offsetHeight;
-    return () => resizeObserver.disconnect();
-  }, []);
-
   return (
-    <div
-      className="relative w-full rounded-xl overflow-hidden"
-      style={{
-        background: 'rgba(0,0,0,0.4)',
-        border: '1px solid rgba(255,215,0,0.15)',
-        height: '120px'
-      }}
-    >
-      {/* Background image */}
-      <img
-        src="/assets/generated/spectrum-hero.dim_800x200.png"
-        alt=""
-        className="absolute inset-0 w-full h-full object-cover opacity-10 pointer-events-none"
-      />
+    <div className="glass-panel rounded-xl border border-ultra-gold/20 overflow-hidden">
       <canvas
         ref={canvasRef}
-        className="absolute inset-0 w-full h-full"
-        style={{ display: 'block' }}
+        width={600}
+        height={120}
+        className="w-full h-24 block"
+        style={{ imageRendering: 'pixelated' }}
       />
-      <div
-        className="absolute top-2 left-3 font-orbitron text-xs font-bold uppercase tracking-widest"
-        style={{ color: 'rgba(255,215,0,0.5)' }}
-      >
-        Spectrum Analyzer
-      </div>
-      {!isPlaying && (
-        <div
-          className="absolute inset-0 flex items-center justify-center font-orbitron text-xs uppercase tracking-widest"
-          style={{ color: 'rgba(255,215,0,0.2)' }}
-        >
-          — Awaiting Signal —
-        </div>
-      )}
     </div>
   );
 }

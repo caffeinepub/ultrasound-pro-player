@@ -1,494 +1,215 @@
-import { useRef, useEffect, useCallback } from 'react';
-import { AudioEngineControls } from '../hooks/useAudioEngine';
-import { BatteryState } from '../hooks/useBatteryCharging';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
+import { AudioEngine } from '../hooks/useAudioEngine';
 
 interface Props {
-  audioEngine: AudioEngineControls;
-  batteryState: BatteryState;
+  audioEngine: AudioEngine;
+  isPlaying: boolean;
 }
 
-const SMART_CHIP_MONITORS = ['Boost', 'Effect', 'Lagging', 'Clipping', 'Stuttering', 'Zero BG Noise'];
+interface ChipState {
+  name: string;
+  status: 'active' | 'warning' | 'error' | 'fixing' | 'fixed';
+  readout: string;
+}
 
-const PROCESSOR_CLASSES = [
-  { name: 'Class A+', color: '#FFD700', desc: 'Ultra Clean' },
-  { name: 'Class B', color: '#00BFFF', desc: 'Super Clean' },
-  { name: 'Class C+', color: '#FF8C00', desc: 'Mega Clean' },
-  { name: 'Class D', color: '#9B59B6', desc: 'Deep Clean' },
+interface AutoFixIssue {
+  id: string;
+  type: string;
+  message: string;
+  fixed: boolean;
+}
+
+const CHIP_NAMES = [
+  'DSP Core 1', 'DSP Core 2', 'EQ Processor', 'Limiter', 'Compressor',
+  'Reverb Unit', 'Delay Line', 'Noise Gate', 'Stereo Widener', 'Bass Enhancer',
+  'Treble Boost', 'Mid Scoop', 'Harmonic Gen', 'Phase Align', 'Dynamic EQ',
+  'Multiband Comp', 'Transient Shaper', 'Exciter', 'De-Esser', 'Master Limiter',
 ];
 
-function SmartChipCard({ chipNumber, amplitude }: { chipNumber: number; amplitude: number }) {
-  const isActive = amplitude > 0.05;
-  const chipColor = isActive ? '#FFD700' : 'rgba(255,255,255,0.15)';
+const CLASS_LABELS = ['Class A+', 'Class B+', 'Class C+', 'Class D+'];
 
-  return (
-    <div
-      className="rounded-xl p-2 flex flex-col gap-1.5"
-      style={{
-        background: isActive
-          ? 'rgba(255,215,0,0.06)'
-          : 'rgba(255,255,255,0.02)',
-        border: `1px solid ${isActive ? 'rgba(255,215,0,0.3)' : 'rgba(255,255,255,0.08)'}`,
-        boxShadow: isActive ? '0 0 10px rgba(255,215,0,0.15)' : 'none',
-        transition: 'all 0.15s ease',
-        minWidth: 0,
-      }}
-    >
-      {/* Chip header */}
-      <div className="flex items-center justify-between">
-        <span
-          className="font-orbitron font-black text-xs"
-          style={{ color: chipColor }}
-        >
-          SC-{String(chipNumber).padStart(2, '0')}
-        </span>
-        <div
-          className="w-2 h-2 rounded-full"
-          style={{
-            background: isActive ? '#00FF64' : 'rgba(255,255,255,0.2)',
-            boxShadow: isActive ? '0 0 6px rgba(0,255,100,0.8)' : 'none',
-            animation: isActive ? 'battery-fill 1s ease-in-out infinite' : 'none',
-          }}
-        />
-      </div>
-
-      {/* Monitor indicators */}
-      <div className="grid grid-cols-3 gap-0.5">
-        {SMART_CHIP_MONITORS.map((monitor, i) => {
-          const monitorActive = isActive && (chipNumber + i) % 3 !== 0;
-          return (
-            <div
-              key={monitor}
-              className="rounded px-1 py-0.5 text-center"
-              style={{
-                background: monitorActive ? 'rgba(0,191,255,0.15)' : 'rgba(255,255,255,0.03)',
-                border: `1px solid ${monitorActive ? 'rgba(0,191,255,0.3)' : 'rgba(255,255,255,0.05)'}`,
-              }}
-            >
-              <span
-                className="font-rajdhani font-bold"
-                style={{
-                  fontSize: '8px',
-                  color: monitorActive ? '#00BFFF' : 'rgba(255,255,255,0.25)',
-                  lineHeight: 1,
-                  display: 'block',
-                }}
-              >
-                {monitor.split(' ')[0]}
-              </span>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
+function initChips(): ChipState[] {
+  return CHIP_NAMES.map((name) => ({ name, status: 'active', readout: 'OK' }));
 }
 
-export function ProcessorPage({ audioEngine, batteryState }: Props) {
-  const amplitudeRef = useRef(0);
+export default function ProcessorPage({ audioEngine, isPlaying }: Props) {
+  const [chips, setChips] = useState<ChipState[]>(initChips);
+  const [issues, setIssues] = useState<AutoFixIssue[]>([]);
+  const [freqBars, setFreqBars] = useState<number[]>(new Array(32).fill(0));
   const rafRef = useRef<number | null>(null);
-  const freqBarsRef = useRef<HTMLDivElement[]>([]);
-  const stabilizerBarRef = useRef<HTMLDivElement>(null);
-  const chipsContainerRef = useRef<HTMLDivElement>(null);
-  const ampDisplayRef = useRef<HTMLSpanElement>(null);
+  const frameCount = useRef(0);
 
-  const animate = useCallback(() => {
-    const analyser = audioEngine.getAnalyser();
-    if (analyser) {
-      const data = new Uint8Array(analyser.frequencyBinCount);
-      analyser.getByteFrequencyData(data);
-      let sum = 0;
-      for (let i = 0; i < data.length; i++) sum += (data[i] / 255) ** 2;
-      const rms = Math.sqrt(sum / data.length);
-      amplitudeRef.current = amplitudeRef.current * 0.75 + rms * 0.25;
+  const analyze = useCallback(() => {
+    const analyser = audioEngine.getAnalyserNode();
+    frameCount.current++;
 
-      // Update frequency bars
-      const step = Math.floor(data.length / freqBarsRef.current.length);
-      freqBarsRef.current.forEach((bar, i) => {
-        if (!bar) return;
-        const val = data[i * step] / 255;
-        bar.style.height = `${Math.max(4, val * 60)}px`;
-        const r = Math.round(255 * val);
-        const g = Math.round(215 * val + 191 * (1 - val));
-        const b = Math.round(255 * (1 - val));
-        bar.style.background = `rgba(${r},${g},${b},0.9)`;
-        bar.style.boxShadow = `0 0 ${val * 8}px rgba(${r},${g},${b},0.8)`;
-      });
-
-      // Update stabilizer bar
-      if (stabilizerBarRef.current) {
-        const stabVal = 80000 + amplitudeRef.current * 10000;
-        stabilizerBarRef.current.style.width = `${Math.min(100, amplitudeRef.current * 100 + 20)}%`;
-      }
-
-      // Update amp display
-      if (ampDisplayRef.current) {
-        const stabVal = Math.round(80000 + amplitudeRef.current * 10000);
-        ampDisplayRef.current.textContent = stabVal.toLocaleString();
-      }
-    } else {
-      amplitudeRef.current *= 0.95;
+    if (!analyser || !isPlaying) {
+      setFreqBars(new Array(32).fill(0));
+      return;
     }
 
-    rafRef.current = requestAnimationFrame(animate);
-  }, [audioEngine]);
+    const data = new Uint8Array(analyser.frequencyBinCount);
+    analyser.getByteFrequencyData(data);
+
+    // Frequency bars (32 bars)
+    const step = Math.floor(data.length / 32);
+    const bars = Array.from({ length: 32 }, (_, i) => data[i * step] / 255);
+    setFreqBars(bars);
+
+    // Auto-fix detection every 30 frames
+    if (frameCount.current % 30 === 0) {
+      const avg = data.reduce((a, b) => a + b, 0) / data.length;
+      const max = Math.max(...data);
+      const newIssues: AutoFixIssue[] = [];
+
+      if (max > 240) {
+        newIssues.push({ id: 'clip', type: 'Clipping', message: 'Peak level exceeding threshold — applying limiter', fixed: false });
+      }
+      if (avg < 5 && isPlaying) {
+        newIssues.push({ id: 'stutter', type: 'Buffer Drop', message: 'Low signal detected — checking buffer', fixed: false });
+      }
+      if (avg > 180) {
+        newIssues.push({ id: 'distort', type: 'Distortion', message: 'High RMS detected — reducing gain', fixed: false });
+      }
+
+      if (newIssues.length > 0) {
+        setIssues(newIssues);
+        // Auto-fix after 1.5s
+        setTimeout(() => {
+          setIssues((prev) => prev.map((iss) => ({ ...iss, fixed: true })));
+          setTimeout(() => setIssues([]), 2000);
+        }, 1500);
+      }
+
+      // Randomly animate chips
+      if (frameCount.current % 90 === 0) {
+        setChips((prev) => prev.map((chip, i) => {
+          if (Math.random() < 0.1) {
+            return { ...chip, status: 'fixing', readout: 'FIXING...' };
+          }
+          if (chip.status === 'fixing') {
+            return { ...chip, status: 'fixed', readout: 'FIXED ✓' };
+          }
+          if (chip.status === 'fixed') {
+            return { ...chip, status: 'active', readout: 'OK' };
+          }
+          return chip;
+        }));
+      }
+    }
+  }, [audioEngine, isPlaying]);
 
   useEffect(() => {
-    rafRef.current = requestAnimationFrame(animate);
-    return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    const loop = () => {
+      analyze();
+      rafRef.current = requestAnimationFrame(loop);
     };
-  }, [animate]);
+    rafRef.current = requestAnimationFrame(loop);
+    return () => {
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+    };
+  }, [analyze]);
 
-  const amplitude = amplitudeRef.current;
+  const statusColor = (status: ChipState['status']) => {
+    switch (status) {
+      case 'active': return 'bg-green-400';
+      case 'warning': return 'bg-yellow-400';
+      case 'error': return 'bg-red-400';
+      case 'fixing': return 'bg-yellow-400 animate-pulse';
+      case 'fixed': return 'bg-green-400 animate-pulse';
+    }
+  };
 
   return (
-    <div className="flex flex-col gap-4">
-      {/* ── HEADER ── */}
-      <div
-        className="rounded-2xl p-5 text-center"
-        style={{
-          background: 'linear-gradient(135deg, rgba(255,215,0,0.08), rgba(0,191,255,0.05))',
-          border: '1px solid rgba(255,215,0,0.3)',
-          boxShadow: '0 0 30px rgba(255,215,0,0.1)',
-        }}
-      >
-        <div
-          className="font-orbitron font-black text-lg md:text-xl uppercase tracking-widest text-glow-gold mb-1"
-          style={{ color: '#FFD700' }}
-        >
-          ⚙️ Number 1 Processor in the Whole World
-        </div>
-        <div className="font-rajdhani text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>
-          Not Your Standard Regular Classes — These Are More Super Clean Sound Control
-        </div>
-
-        {/* Classes */}
-        <div className="flex flex-wrap justify-center gap-3 mt-4">
-          {PROCESSOR_CLASSES.map((cls) => (
-            <div
-              key={cls.name}
-              className="flex flex-col items-center px-4 py-2 rounded-xl"
-              style={{
-                background: `rgba(${cls.color === '#FFD700' ? '255,215,0' : cls.color === '#00BFFF' ? '0,191,255' : cls.color === '#FF8C00' ? '255,140,0' : '155,89,182'},0.1)`,
-                border: `1px solid ${cls.color}40`,
-                boxShadow: `0 0 12px ${cls.color}30`,
-              }}
-            >
-              <span className="font-orbitron font-black text-sm" style={{ color: cls.color }}>
-                {cls.name}
-              </span>
-              <span className="font-rajdhani text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                {cls.desc}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* ── 20 SMART CHIPS ── */}
-      <div
-        className="rounded-2xl p-4"
-        style={{
-          background: 'rgba(0,0,0,0.3)',
-          border: '1px solid rgba(255,215,0,0.15)',
-        }}
-      >
-        <div className="flex items-center justify-between mb-3">
-          <h3
-            className="font-orbitron font-black text-sm uppercase tracking-widest"
-            style={{ color: '#FFD700' }}
-          >
-            🔬 20 Smart Chips
-          </h3>
-          <span className="font-rajdhani text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
-            Each with Built-in Control Monitor
+    <div className="space-y-4">
+      {/* Title */}
+      <div className="text-center space-y-2">
+        <h2 className="font-orbitron font-black text-ultra-gold text-lg sm:text-xl tracking-wider glow-gold">
+          NUMBER 1 PROCESSOR IN THE WHOLE WORLD
+        </h2>
+        <div className="flex items-center justify-center gap-3 flex-wrap">
+          <span className="px-4 py-1.5 bg-ultra-gold/20 border-2 border-ultra-gold text-ultra-gold font-orbitron font-black text-sm rounded-full shadow-glow-gold">
+            HIGH TOP 9.0
           </span>
-        </div>
-        <div
-          ref={chipsContainerRef}
-          className="grid gap-2"
-          style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))' }}
-        >
-          {Array.from({ length: 20 }, (_, i) => (
-            <SmartChipCard key={i} chipNumber={i + 1} amplitude={amplitude} />
-          ))}
-        </div>
-        {/* Monitor legend */}
-        <div className="flex flex-wrap gap-2 mt-3 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-          {SMART_CHIP_MONITORS.map((m) => (
-            <span
-              key={m}
-              className="font-rajdhani text-xs px-2 py-0.5 rounded-full"
-              style={{
-                background: 'rgba(0,191,255,0.08)',
-                border: '1px solid rgba(0,191,255,0.2)',
-                color: 'rgba(0,191,255,0.7)',
-              }}
-            >
-              {m}
+          {CLASS_LABELS.map((label) => (
+            <span key={label} className="px-3 py-1 bg-ultra-blue/10 border border-ultra-blue/40 text-ultra-blue font-rajdhani font-bold text-sm rounded-full">
+              {label}
             </span>
           ))}
         </div>
       </div>
 
-      {/* ── STABILIZER + AMP ── */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Smart Chip Stabilizer */}
-        <div
-          className="rounded-2xl p-4"
-          style={{
-            background: 'rgba(0,0,0,0.3)',
-            border: '1px solid rgba(255,215,0,0.2)',
-          }}
-        >
-          <h3
-            className="font-orbitron font-black text-sm uppercase tracking-widest mb-1"
-            style={{ color: '#FFD700' }}
+      {/* Smart Chips Grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        {chips.map((chip, i) => (
+          <div
+            key={i}
+            className="glass-panel rounded-lg p-2 border border-white/10 flex flex-col gap-1"
           >
-            🎛️ Smart Chip Stabilizer
-          </h3>
-          <div className="font-rajdhani text-xs mb-3" style={{ color: 'rgba(255,255,255,0.4)' }}>
-            80Hz Deep Low Manager
-          </div>
-
-          {/* Range display */}
-          <div className="flex items-center justify-between mb-2">
-            <span className="font-orbitron text-xs" style={{ color: 'rgba(255,215,0,0.6)' }}>
-              80,000
-            </span>
-            <span
-              className="font-orbitron font-black text-sm"
-              style={{ color: '#FFD700' }}
-            >
-              <span ref={ampDisplayRef}>80,000</span>
-            </span>
-            <span className="font-orbitron text-xs" style={{ color: 'rgba(255,215,0,0.6)' }}>
-              90,000
+            <div className="flex items-center gap-1.5">
+              <div className={`w-2 h-2 rounded-full shrink-0 ${statusColor(chip.status)}`} />
+              <span className="font-rajdhani font-semibold text-white/80 text-xs truncate">{chip.name}</span>
+            </div>
+            <span className={`font-mono text-xs font-bold ${
+              chip.status === 'fixing' ? 'text-yellow-400' :
+              chip.status === 'fixed' ? 'text-green-400' :
+              chip.status === 'error' ? 'text-red-400' :
+              'text-white/50'
+            }`}>
+              {chip.readout}
             </span>
           </div>
+        ))}
+      </div>
 
-          {/* Stabilizer bar */}
-          <div
-            className="relative rounded-full overflow-hidden"
-            style={{
-              height: 12,
-              background: 'rgba(255,215,0,0.1)',
-              border: '1px solid rgba(255,215,0,0.2)',
-            }}
-          >
-            <div
-              ref={stabilizerBarRef}
-              className="absolute left-0 top-0 h-full rounded-full"
-              style={{
-                width: '20%',
-                background: 'linear-gradient(90deg, #FFD700, #00BFFF)',
-                boxShadow: '0 0 10px rgba(255,215,0,0.6)',
-                transition: 'width 0.1s ease-out',
-              }}
-            />
-          </div>
-
-          <div
-            className="font-rajdhani text-xs mt-2"
-            style={{ color: 'rgba(255,255,255,0.35)' }}
-          >
-            Range: 80,000 – 90,000
-          </div>
-        </div>
-
-        {/* Intelligent Amp */}
-        <div
-          className="rounded-2xl p-4"
-          style={{
-            background: 'rgba(0,0,0,0.3)',
-            border: '1px solid rgba(0,191,255,0.2)',
-          }}
-        >
-          <h3
-            className="font-orbitron font-black text-sm uppercase tracking-widest mb-1"
-            style={{ color: '#00BFFF' }}
-          >
-            ⚡ Intelligent Amp
-          </h3>
-          <div
-            className="font-rajdhani font-bold text-sm mb-2"
-            style={{ color: 'rgba(255,255,255,0.7)' }}
-          >
-            Does NOT Limit Music — It CORRECTS It
-          </div>
+      {/* Auto-Fix Monitor */}
+      <div className="glass-panel rounded-xl p-3 border border-ultra-blue/20">
+        <h4 className="font-orbitron font-bold text-ultra-blue text-xs tracking-wider mb-2">
+          ⚡ AUTO-FIX MONITOR
+        </h4>
+        {issues.length === 0 ? (
+          <p className="text-green-400 font-rajdhani text-sm">✓ All systems nominal — no issues detected</p>
+        ) : (
           <div className="space-y-1">
-            {[
-              'Full Stabilizer Power',
-              'Super Amp Control',
-              'Super Modes for Everything',
-            ].map((item) => (
-              <div key={item} className="flex items-center gap-2">
-                <div
-                  className="w-1.5 h-1.5 rounded-full shrink-0"
-                  style={{ background: '#00BFFF', boxShadow: '0 0 6px rgba(0,191,255,0.8)' }}
-                />
-                <span className="font-rajdhani text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>
-                  {item}
-                </span>
+            {issues.map((issue) => (
+              <div key={issue.id} className={`flex items-center gap-2 text-xs font-rajdhani ${issue.fixed ? 'text-green-400' : 'text-yellow-400'}`}>
+                <span>{issue.fixed ? '✓ FIXED:' : '⚠ DETECTED:'}</span>
+                <span className="font-bold">{issue.type}</span>
+                <span className="text-white/60">— {issue.message}</span>
               </div>
             ))}
           </div>
-          <div
-            className="mt-3 px-3 py-1.5 rounded-lg text-center font-orbitron text-xs font-bold"
-            style={{
-              background: 'rgba(0,191,255,0.1)',
-              border: '1px solid rgba(0,191,255,0.3)',
-              color: '#00BFFF',
-            }}
-          >
-            IT IS A STABILIZER
-          </div>
-        </div>
+        )}
       </div>
 
-      {/* ── AUTOMATIC FREQUENCY CONTROL ── */}
-      <div
-        className="rounded-2xl p-4"
-        style={{
-          background: 'rgba(0,0,0,0.3)',
-          border: '1px solid rgba(255,140,0,0.25)',
-        }}
-      >
-        <div className="flex items-center justify-between mb-3">
-          <h3
-            className="font-orbitron font-black text-sm uppercase tracking-widest"
-            style={{ color: '#FF8C00' }}
-          >
-            🎵 Automatic Frequency Control
-          </h3>
-          <span className="font-rajdhani text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
-            Adjusted to All Songs
-          </span>
-        </div>
-
-        {/* Live frequency bars */}
-        <div
-          className="flex items-end gap-0.5 rounded-xl overflow-hidden p-2"
-          style={{
-            background: 'rgba(0,0,0,0.4)',
-            border: '1px solid rgba(255,140,0,0.1)',
-            height: 80,
-          }}
-        >
-          {Array.from({ length: 32 }, (_, i) => (
+      {/* Frequency Bars */}
+      <div className="glass-panel rounded-xl p-3 border border-ultra-gold/20">
+        <h4 className="font-orbitron font-bold text-ultra-gold text-xs tracking-wider mb-2">
+          FREQUENCY ANALYSIS
+        </h4>
+        <div className="flex items-end gap-0.5 h-16">
+          {freqBars.map((val, i) => (
             <div
               key={i}
-              ref={(el) => {
-                if (el) freqBarsRef.current[i] = el;
-              }}
-              className="flex-1 rounded-t-sm"
+              className="flex-1 rounded-t transition-all duration-75"
               style={{
-                height: 4,
-                background: 'rgba(255,140,0,0.4)',
-                transition: 'height 0.05s ease-out',
-                minWidth: 0,
+                height: `${Math.max(2, val * 100)}%`,
+                background: `linear-gradient(to top, #FFD700, #FFA500)`,
+                boxShadow: val > 0.5 ? '0 0 4px rgba(255,215,0,0.6)' : 'none',
               }}
             />
           ))}
         </div>
-
-        <div className="font-rajdhani text-xs mt-2 text-center" style={{ color: 'rgba(255,255,255,0.35)' }}>
-          Processor listens to the music and auto-adjusts frequency balance for every song
-        </div>
       </div>
 
-      {/* ── DAW VST GENERATOR + SPECS ── */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* DAW VST Generator */}
-        <div
-          className="rounded-2xl p-4"
-          style={{
-            background: 'rgba(0,0,0,0.3)',
-            border: '1px solid rgba(155,89,182,0.3)',
-          }}
-        >
-          <h3
-            className="font-orbitron font-black text-sm uppercase tracking-widest mb-3"
-            style={{ color: '#9B59B6' }}
-          >
-            🎛️ Special DAW VST Generator
-          </h3>
-          <div className="space-y-2">
-            {[
-              { label: 'Big Grant FPGA', icon: '🔲' },
-              { label: 'CPU Booster', icon: '⚡' },
-              { label: 'Signal Stimulation', icon: '📡' },
-              { label: 'DAW VST Plug-in', icon: '🎚️' },
-            ].map((item) => (
-              <div key={item.label} className="flex items-center gap-2">
-                <span style={{ fontSize: 14 }}>{item.icon}</span>
-                <span className="font-rajdhani text-sm font-bold" style={{ color: 'rgba(255,255,255,0.6)' }}>
-                  {item.label}
-                </span>
-                <div
-                  className="ml-auto w-2 h-2 rounded-full"
-                  style={{ background: '#9B59B6', boxShadow: '0 0 6px rgba(155,89,182,0.8)' }}
-                />
-              </div>
-            ))}
-          </div>
+      {/* Stabilizer Range */}
+      <div className="glass-panel rounded-xl p-3 border border-white/10">
+        <div className="flex justify-between items-center text-xs font-mono text-white/40">
+          <span>20 Hz</span>
+          <span className="text-ultra-gold font-rajdhani font-bold">STABILIZER RANGE</span>
+          <span>20 kHz</span>
         </div>
-
-        {/* Processor Specs */}
-        <div
-          className="rounded-2xl p-4"
-          style={{
-            background: 'rgba(0,0,0,0.3)',
-            border: '1px solid rgba(0,255,100,0.2)',
-          }}
-        >
-          <h3
-            className="font-orbitron font-black text-sm uppercase tracking-widest mb-3"
-            style={{ color: '#00FF64' }}
-          >
-            📊 Processor Specs
-          </h3>
-          <div className="grid grid-cols-2 gap-2">
-            {[
-              { label: 'Voltage', value: '12 Volt' },
-              { label: 'Cores', value: '20 Core' },
-              { label: 'Thunders', value: '30 Wide' },
-              { label: 'Rank', value: '#1 World' },
-            ].map((spec) => (
-              <div
-                key={spec.label}
-                className="rounded-lg p-2 text-center"
-                style={{
-                  background: 'rgba(0,255,100,0.05)',
-                  border: '1px solid rgba(0,255,100,0.15)',
-                }}
-              >
-                <div className="font-orbitron font-black text-sm" style={{ color: '#00FF64' }}>
-                  {spec.value}
-                </div>
-                <div className="font-rajdhani text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
-                  {spec.label}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Battery integration */}
-          <div
-            className="mt-3 rounded-lg p-2 flex items-center justify-between"
-            style={{
-              background: 'rgba(255,215,0,0.05)',
-              border: '1px solid rgba(255,215,0,0.15)',
-            }}
-          >
-            <span className="font-rajdhani text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
-              Battery Mix
-            </span>
-            <span className="font-orbitron font-black text-sm" style={{ color: '#FFD700' }}>
-              {batteryState.percentage}% — {batteryState.outputPower.toLocaleString()}W
-            </span>
-          </div>
-        </div>
+        <div className="mt-2 h-1 bg-gradient-to-r from-ultra-blue via-ultra-gold to-ultra-blue rounded-full opacity-60" />
       </div>
     </div>
   );

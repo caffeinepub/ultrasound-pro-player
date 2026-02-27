@@ -1,212 +1,131 @@
-import { useRef, useCallback, useState } from 'react';
-import { EQ_FREQUENCIES, SOUND_ENGINE_PRESETS, SoundEngine } from '../utils/audioConstants';
+import { useRef, useCallback } from 'react';
+import { EQ_FREQUENCIES } from '../utils/audioConstants';
 
-export interface AudioEngineState {
-  isAvailable: boolean;
-  isInitialized: boolean;
-  error: string | null;
-}
+export class AudioEngine {
+  private audioContext: AudioContext | null = null;
+  private filters: BiquadFilterNode[] = [];
+  private gainNode: GainNode | null = null;
+  private analyserNode: AnalyserNode | null = null;
+  private sourceMap = new WeakMap<HTMLAudioElement, MediaElementAudioSourceNode>();
 
-export interface AudioEngineControls {
-  initializeContext: () => Promise<AudioContext | null>;
-  connectSource: (element: HTMLAudioElement) => void;
-  disconnectSource: () => void;
-  setFilterGain: (bandIndex: number, gainDb: number) => void;
-  setMultipleFilterGains: (gains: number[]) => void;
-  setSoundEngine: (engine: SoundEngine) => void;
-  getAnalyser: () => AnalyserNode | null;
-  getFilterGains: () => number[];
-  state: AudioEngineState;
-}
+  initContext(): AudioContext {
+    if (!this.audioContext) {
+      this.audioContext = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+      this.gainNode = this.audioContext.createGain();
+      this.gainNode.gain.value = 1.0;
 
-export function useAudioEngine(): AudioEngineControls {
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const filtersRef = useRef<BiquadFilterNode[]>([]);
-  const gainNodeRef = useRef<GainNode | null>(null);
-  const analyserRef = useRef<AnalyserNode | null>(null);
-  const sourceNodeRef = useRef<MediaElementAudioSourceNode | null>(null);
-  const currentElementRef = useRef<HTMLAudioElement | null>(null);
-  const filterGainsRef = useRef<number[]>(new Array(20).fill(0));
+      this.analyserNode = this.audioContext.createAnalyser();
+      this.analyserNode.fftSize = 2048;
+      this.analyserNode.smoothingTimeConstant = 0.8;
 
-  const [state, setState] = useState<AudioEngineState>({
-    isAvailable:
-      typeof AudioContext !== 'undefined' ||
-      typeof (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext !==
-        'undefined',
-    isInitialized: false,
-    error: null,
-  });
-
-  const initializeContext = useCallback(async (): Promise<AudioContext | null> => {
-    // If context already exists, resume it if suspended and return it
-    if (audioContextRef.current) {
-      const ctx = audioContextRef.current;
-      if (ctx.state === 'suspended') {
-        try {
-          await ctx.resume();
-        } catch (e) {
-          console.warn('Failed to resume AudioContext:', e);
-        }
-      }
-      return ctx;
-    }
-
-    try {
-      const AudioCtx =
-        window.AudioContext ||
-        (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-      if (!AudioCtx) {
-        setState((s) => ({ ...s, isAvailable: false, error: 'Web Audio API not supported' }));
-        return null;
-      }
-
-      const ctx = new AudioCtx();
-      audioContextRef.current = ctx;
-
-      // Create 20 BiquadFilterNodes in series
-      const filters: BiquadFilterNode[] = [];
-      for (let i = 0; i < EQ_FREQUENCIES.length; i++) {
-        const filter = ctx.createBiquadFilter();
-        if (i === 0) {
-          filter.type = 'lowshelf';
-        } else if (i === EQ_FREQUENCIES.length - 1) {
-          filter.type = 'highshelf';
-        } else {
-          filter.type = 'peaking';
-        }
-        filter.frequency.value = EQ_FREQUENCIES[i];
-        filter.Q.value = 1.4;
+      this.filters = EQ_FREQUENCIES.map((freq) => {
+        const filter = this.audioContext!.createBiquadFilter();
+        filter.type = 'peaking';
+        filter.frequency.value = freq;
+        filter.Q.value = 1.0;
         filter.gain.value = 0;
-        filters.push(filter);
+        return filter;
+      });
+
+      // Chain: filters[0] → filters[1] → ... → filters[19] → gainNode → destination
+      //                                                      → analyserNode
+      for (let i = 0; i < this.filters.length - 1; i++) {
+        this.filters[i].connect(this.filters[i + 1]);
       }
-      filtersRef.current = filters;
-
-      // Create gain node
-      const gainNode = ctx.createGain();
-      gainNode.gain.value = 1.0;
-      gainNodeRef.current = gainNode;
-
-      // Create analyser
-      const analyser = ctx.createAnalyser();
-      analyser.fftSize = 2048;
-      analyser.smoothingTimeConstant = 0.8;
-      analyserRef.current = analyser;
-
-      // Connect filter chain: filters[0] -> ... -> filters[19] -> gainNode -> analyser -> destination
-      for (let i = 0; i < filters.length - 1; i++) {
-        filters[i].connect(filters[i + 1]);
-      }
-      filters[filters.length - 1].connect(gainNode);
-      gainNode.connect(analyser);
-      analyser.connect(ctx.destination);
-
-      // Resume immediately if suspended (browser autoplay policy)
-      if (ctx.state === 'suspended') {
-        try {
-          await ctx.resume();
-        } catch (e) {
-          console.warn('AudioContext resume failed on init:', e);
-        }
-      }
-
-      setState({ isAvailable: true, isInitialized: true, error: null });
-      return ctx;
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Failed to initialize audio engine';
-      setState((s) => ({ ...s, error: msg }));
-      return null;
+      const lastFilter = this.filters[this.filters.length - 1];
+      lastFilter.connect(this.gainNode);
+      this.gainNode.connect(this.audioContext.destination);
+      this.gainNode.connect(this.analyserNode);
+    } else if (this.audioContext.state === 'suspended') {
+      this.audioContext.resume();
     }
-  }, []);
+    return this.audioContext;
+  }
 
-  const connectSource = useCallback(
-    (element: HTMLAudioElement) => {
-      const ctx = audioContextRef.current;
-      if (!ctx || !filtersRef.current.length) return;
-
-      // If same element already connected, skip — the MediaElementSourceNode follows the element's src
-      if (currentElementRef.current === element && sourceNodeRef.current) {
-        return;
-      }
-
-      // Disconnect previous source if it was a different element
-      if (sourceNodeRef.current) {
-        try {
-          sourceNodeRef.current.disconnect();
-        } catch (_) {
-          /* ignore */
-        }
-        sourceNodeRef.current = null;
-        currentElementRef.current = null;
-      }
-
-      try {
-        const source = ctx.createMediaElementSource(element);
-        sourceNodeRef.current = source;
-        currentElementRef.current = element;
-        source.connect(filtersRef.current[0]);
-      } catch (err) {
-        console.warn('Could not connect audio source:', err);
-      }
-    },
-    []
-  );
-
-  const disconnectSource = useCallback(() => {
-    if (sourceNodeRef.current) {
-      try {
-        sourceNodeRef.current.disconnect();
-      } catch (_) {
-        /* ignore */
-      }
-      sourceNodeRef.current = null;
-      currentElementRef.current = null;
+  connectSource(audioElement: HTMLAudioElement): void {
+    if (!this.audioContext || this.filters.length === 0) {
+      console.warn('[AudioEngine] connectSource called before initContext');
+      return;
     }
-  }, []);
-
-  const setFilterGain = useCallback((bandIndex: number, gainDb: number) => {
-    if (bandIndex < 0 || bandIndex >= filtersRef.current.length) return;
-    const filter = filtersRef.current[bandIndex];
-    if (filter) {
-      filter.gain.setTargetAtTime(gainDb, audioContextRef.current?.currentTime ?? 0, 0.01);
-      filterGainsRef.current[bandIndex] = gainDb;
+    if (this.sourceMap.has(audioElement)) {
+      console.log('[AudioEngine] Source already connected, skipping duplicate connection');
+      return;
     }
+    const source = this.audioContext.createMediaElementSource(audioElement);
+    this.sourceMap.set(audioElement, source);
+    source.connect(this.filters[0]);
+    console.log('[AudioEngine] Source connected to filter chain');
+  }
+
+  setEQBand(index: number, gain: number): void {
+    if (this.filters[index]) {
+      this.filters[index].gain.value = gain;
+    }
+  }
+
+  setGainCorrection(gain: number): void {
+    if (this.gainNode) {
+      this.gainNode.gain.value = gain;
+    }
+  }
+
+  applyAutoGainCorrection(): void {
+    if (this.gainNode) {
+      this.gainNode.gain.value = 1.0;
+    }
+  }
+
+  getAnalyserNode(): AnalyserNode | null {
+    return this.analyserNode;
+  }
+
+  getGainNode(): GainNode | null {
+    return this.gainNode;
+  }
+
+  isReady(): boolean {
+    return this.audioContext !== null && this.filters.length > 0;
+  }
+}
+
+let sharedEngine: AudioEngine | null = null;
+
+export function useAudioEngine() {
+  const engineRef = useRef<AudioEngine | null>(null);
+
+  if (!engineRef.current) {
+    if (!sharedEngine) {
+      sharedEngine = new AudioEngine();
+    }
+    engineRef.current = sharedEngine;
+  }
+
+  const initContext = useCallback(() => {
+    return engineRef.current!.initContext();
   }, []);
 
-  const setMultipleFilterGains = useCallback((gains: number[]) => {
-    gains.forEach((gain, i) => {
-      if (i < filtersRef.current.length) {
-        const filter = filtersRef.current[i];
-        if (filter) {
-          filter.gain.setTargetAtTime(gain, audioContextRef.current?.currentTime ?? 0, 0.01);
-          filterGainsRef.current[i] = gain;
-        }
-      }
-    });
+  const connectSource = useCallback((audioElement: HTMLAudioElement) => {
+    engineRef.current!.connectSource(audioElement);
   }, []);
 
-  const setSoundEngine = useCallback(
-    (engine: SoundEngine) => {
-      const preset = SOUND_ENGINE_PRESETS[engine];
-      if (preset) {
-        setMultipleFilterGains(preset);
-      }
-    },
-    [setMultipleFilterGains]
-  );
+  const setEQBand = useCallback((index: number, gain: number) => {
+    engineRef.current!.setEQBand(index, gain);
+  }, []);
 
-  const getAnalyser = useCallback(() => analyserRef.current, []);
+  const setGainCorrection = useCallback((gain: number) => {
+    engineRef.current!.setGainCorrection(gain);
+  }, []);
 
-  const getFilterGains = useCallback(() => [...filterGainsRef.current], []);
+  const getAnalyserNode = useCallback(() => {
+    return engineRef.current!.getAnalyserNode();
+  }, []);
 
   return {
-    initializeContext,
+    audioEngine: engineRef.current,
+    initContext,
     connectSource,
-    disconnectSource,
-    setFilterGain,
-    setMultipleFilterGains,
-    setSoundEngine,
-    getAnalyser,
-    getFilterGains,
-    state,
+    setEQBand,
+    setGainCorrection,
+    getAnalyserNode,
   };
 }

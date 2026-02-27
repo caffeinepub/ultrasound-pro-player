@@ -1,119 +1,110 @@
-import { useRef, useState, useCallback } from 'react';
-import { Upload, FolderOpen } from 'lucide-react';
+import React, { useRef, useState, useCallback } from 'react';
+import { Upload, Link, Music } from 'lucide-react';
 
 interface Props {
-  onFilesAdded: (files: FileList | File[]) => void;
-  error: string | null;
+  onAdd: (files: File[]) => void;
+  onStreamAdded: (url: string) => void;
 }
 
-export function FilePicker({ onFilesAdded, error }: Props) {
+const ACCEPTED = '.mp3,.wav,.flac,.ogg,.aac,.m4a,.webm';
+
+export default function FilePicker({ onAdd, onStreamAdded }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [streamUrl, setStreamUrl] = useState('');
+  const [urlError, setUrlError] = useState('');
 
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-  }, []);
+  const handleFiles = useCallback((fileList: FileList | null) => {
+    if (!fileList) return;
+    const arr = Array.from(fileList);
+    console.log('[FilePicker] handleFiles:', arr.map((f) => f.name));
+    onAdd(arr);
+  }, [onAdd]);
 
-  const handleDragLeave = useCallback((e: React.DragEvent) => {
+  const onDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-  }, []);
+    handleFiles(e.dataTransfer.files);
+  }, [handleFiles]);
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    const files = e.dataTransfer.files;
-    if (files.length > 0) {
-      onFilesAdded(files);
-    }
-  }, [onFilesAdded]);
+  const onDragOver = (e: React.DragEvent) => { e.preventDefault(); setIsDragging(true); };
+  const onDragLeave = () => setIsDragging(false);
 
-  const handleFileInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      onFilesAdded(files);
+  const handleStreamSubmit = () => {
+    const url = streamUrl.trim();
+    if (!url) { setUrlError('Please enter a URL'); return; }
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      setUrlError('URL must start with http:// or https://');
+      return;
     }
-    // Reset input
-    if (inputRef.current) inputRef.current.value = '';
-  }, [onFilesAdded]);
+    setUrlError('');
+    console.log('[FilePicker] Adding stream URL:', url);
+    onStreamAdded(url);
+    setStreamUrl('');
+  };
 
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex items-center justify-between">
-        <h3 className="font-orbitron font-bold text-sm uppercase tracking-widest" style={{ color: '#FFD700' }}>
-          📁 File Picker
-        </h3>
+    <div className="space-y-3">
+      {/* Drop Zone */}
+      <div
+        onDrop={onDrop}
+        onDragOver={onDragOver}
+        onDragLeave={onDragLeave}
+        onClick={() => inputRef.current?.click()}
+        className={`
+          relative cursor-pointer rounded-xl border-2 border-dashed p-5 text-center transition-all duration-200
+          ${isDragging
+            ? 'border-ultra-gold bg-ultra-gold/10 shadow-glow-gold'
+            : 'border-white/20 hover:border-ultra-blue/60 hover:bg-ultra-blue/5'
+          }
+        `}
+      >
+        <input
+          ref={inputRef}
+          type="file"
+          accept={ACCEPTED}
+          multiple
+          className="hidden"
+          onChange={(e) => handleFiles(e.target.files)}
+        />
+        <Upload className={`mx-auto mb-2 w-8 h-8 ${isDragging ? 'text-ultra-gold' : 'text-white/40'}`} />
+        <p className="font-rajdhani font-semibold text-white/70 text-sm">
+          {isDragging ? 'Drop files here!' : 'Drag & drop audio files'}
+        </p>
+        <p className="text-white/40 text-xs mt-1">MP3, WAV, FLAC, OGG, AAC, M4A, WEBM</p>
         <button
-          onClick={() => inputRef.current?.click()}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-rajdhani font-bold uppercase tracking-wider transition-all duration-200 hover:scale-105"
-          style={{
-            background: 'rgba(255,215,0,0.15)',
-            border: '1px solid rgba(255,215,0,0.4)',
-            color: '#FFD700',
-            cursor: 'pointer',
-            boxShadow: '0 0 10px rgba(255,215,0,0.2)'
-          }}
+          type="button"
+          onClick={(e) => { e.stopPropagation(); inputRef.current?.click(); }}
+          className="mt-3 px-4 py-1.5 bg-ultra-blue/20 border border-ultra-blue/40 text-ultra-blue rounded-lg text-sm font-rajdhani font-semibold hover:bg-ultra-blue/30 transition-colors min-h-[44px]"
         >
-          <FolderOpen size={12} />
-          Browse
+          Browse Files
         </button>
       </div>
 
-      {/* Drop Zone */}
-      <div
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-        onClick={() => inputRef.current?.click()}
-        className={`relative flex flex-col items-center justify-center gap-2 p-6 rounded-xl cursor-pointer transition-all duration-300 ${isDragging ? 'drop-zone-active' : ''}`}
-        style={{
-          background: isDragging ? 'rgba(255,215,0,0.08)' : 'rgba(255,255,255,0.03)',
-          border: isDragging
-            ? '2px dashed #FFD700'
-            : '2px dashed rgba(255,215,0,0.25)',
-          boxShadow: isDragging ? '0 0 30px rgba(255,215,0,0.4), inset 0 0 20px rgba(255,215,0,0.05)' : 'none',
-          minHeight: '100px'
-        }}
-      >
-        <Upload
-          size={28}
-          style={{
-            color: isDragging ? '#FFD700' : 'rgba(255,215,0,0.4)',
-            filter: isDragging ? 'drop-shadow(0 0 8px rgba(255,215,0,0.8))' : 'none',
-            transition: 'all 0.3s'
-          }}
-        />
-        <p className="font-rajdhani text-sm text-center" style={{ color: isDragging ? '#FFD700' : 'rgba(255,255,255,0.4)' }}>
-          {isDragging ? 'Drop files here!' : 'Drag & drop audio files'}
-        </p>
-        <p className="font-rajdhani text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>
-          MP3 · WAV · FLAC · OGG · AAC
-        </p>
-      </div>
-
-      {/* Error message */}
-      {error && (
-        <div
-          className="p-2 rounded-md text-xs font-rajdhani"
-          style={{
-            background: 'rgba(255,68,68,0.1)',
-            border: '1px solid rgba(255,68,68,0.3)',
-            color: '#FF6B6B'
-          }}
-        >
-          ⚠ {error}
+      {/* Stream URL */}
+      <div className="glass-panel rounded-xl p-3 border border-white/10">
+        <div className="flex items-center gap-2 mb-2">
+          <Link className="w-4 h-4 text-ultra-blue" />
+          <span className="font-rajdhani font-semibold text-white/80 text-sm">Stream URL</span>
         </div>
-      )}
-
-      <input
-        ref={inputRef}
-        type="file"
-        multiple
-        accept=".mp3,.wav,.flac,.ogg,.aac,.m4a,audio/*"
-        onChange={handleFileInput}
-        className="hidden"
-      />
+        <div className="flex gap-2">
+          <input
+            type="url"
+            value={streamUrl}
+            onChange={(e) => { setStreamUrl(e.target.value); setUrlError(''); }}
+            onKeyDown={(e) => e.key === 'Enter' && handleStreamSubmit()}
+            placeholder="https://stream.example.com/radio"
+            className="flex-1 bg-white/5 border border-white/20 rounded-lg px-3 py-2 text-white/80 text-sm font-rajdhani placeholder-white/30 focus:outline-none focus:border-ultra-blue/60 min-h-[44px]"
+          />
+          <button
+            onClick={handleStreamSubmit}
+            className="px-3 py-2 bg-ultra-blue/20 border border-ultra-blue/40 text-ultra-blue rounded-lg text-sm font-rajdhani font-semibold hover:bg-ultra-blue/30 transition-colors min-h-[44px]"
+          >
+            <Music className="w-4 h-4" />
+          </button>
+        </div>
+        {urlError && <p className="text-red-400 text-xs mt-1 font-rajdhani">{urlError}</p>}
+      </div>
     </div>
   );
 }

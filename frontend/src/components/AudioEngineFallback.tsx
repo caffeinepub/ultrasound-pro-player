@@ -1,13 +1,21 @@
-export function AudioEngineFallback() {
+import React from 'react';
+
+export default function AudioEngineFallback() {
   return (
-    <div className="glass-panel p-8 flex flex-col items-center justify-center gap-4 text-center">
-      <div className="text-4xl">⚠️</div>
-      <h3 className="font-orbitron font-bold text-lg" style={{ color: '#FFD700' }}>
-        Web Audio API Unavailable
-      </h3>
-      <p className="text-gray-300 text-sm max-w-sm">
-        Web Audio API is not supported in your browser. Please use a modern browser (Chrome, Firefox, Safari, Edge) to enjoy ULTRASOUND PRO.
-      </p>
+    <div className="min-h-screen flex items-center justify-center bg-ultra-dark">
+      <div className="glass-panel p-10 rounded-2xl border border-ultra-blue/30 max-w-md text-center">
+        <div className="text-6xl mb-6">🔇</div>
+        <h2 className="text-ultra-gold font-orbitron font-bold text-2xl mb-4 glow-gold">
+          Web Audio API Unavailable
+        </h2>
+        <p className="text-white/70 font-rajdhani text-lg leading-relaxed">
+          Web Audio API is not supported in your browser.
+          Please use a modern browser like{' '}
+          <span className="text-ultra-blue font-semibold">Chrome</span>,{' '}
+          <span className="text-ultra-blue font-semibold">Firefox</span>, or{' '}
+          <span className="text-ultra-blue font-semibold">Edge</span>.
+        </p>
+      </div>
     </div>
   );
 }

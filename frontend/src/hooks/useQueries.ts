@@ -1,2 +1,3 @@
-// No backend queries needed for this client-side only app
+// This app is entirely client-side with no backend queries needed.
+// Placeholder module to satisfy the import structure.
 export {};

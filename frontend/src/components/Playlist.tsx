@@ -1,145 +1,97 @@
+import React from 'react';
+import { X, Radio, Music } from 'lucide-react';
 import { AudioFile } from '../hooks/useAudioFiles';
-import { PlaybackState } from '../hooks/useAudioPlayer';
-import { Trash2, Music } from 'lucide-react';
 
 interface Props {
-  files: AudioFile[];
-  currentIndex: number;
-  playbackState: PlaybackState;
-  onSelect: (file: AudioFile, index: number) => void;
+  tracks: AudioFile[];
+  currentTrack: AudioFile | null;
+  isPlaying: boolean;
+  onSelect: (track: AudioFile) => void;
   onRemove: (id: string) => void;
 }
 
 function formatDuration(seconds: number): string {
-  if (!seconds || isNaN(seconds) || !isFinite(seconds)) return '--:--';
+  if (!seconds || !isFinite(seconds)) return '--:--';
   const m = Math.floor(seconds / 60);
   const s = Math.floor(seconds % 60);
   return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
-const FORMAT_COLORS: Record<string, string> = {
-  MP3: '#FFD700',
-  WAV: '#00BFFF',
-  FLAC: '#00FF7F',
-  OGG: '#FF69B4',
-  AAC: '#FFA500',
-  M4A: '#FFA500',
-};
-
-export function Playlist({ files, currentIndex, playbackState, onSelect, onRemove }: Props) {
-  if (files.length === 0) {
+export default function Playlist({ tracks, currentTrack, isPlaying, onSelect, onRemove }: Props) {
+  if (tracks.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center gap-2 py-8 text-center">
-        <Music size={32} style={{ color: 'rgba(255,215,0,0.2)' }} />
-        <p className="font-rajdhani text-sm" style={{ color: 'rgba(255,255,255,0.3)' }}>
-          No tracks loaded
-        </p>
-        <p className="font-rajdhani text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>
-          Add files above to get started
-        </p>
+      <div className="flex flex-col items-center justify-center py-8 text-center">
+        <Music className="w-10 h-10 text-white/20 mb-3" />
+        <p className="text-white/40 font-rajdhani text-sm">No tracks loaded.</p>
+        <p className="text-white/30 font-rajdhani text-xs mt-1">Add audio files or paste a stream URL.</p>
       </div>
     );
   }
 
-  const isCurrentPlaying = playbackState === 'playing';
-
   return (
-    <div className="flex flex-col gap-1">
-      <h3
-        className="font-orbitron font-bold text-sm uppercase tracking-widest mb-2"
-        style={{ color: '#FFD700' }}
-      >
-        🎵 Playlist ({files.length})
-      </h3>
-      <div className="flex flex-col gap-1 max-h-64 overflow-y-auto scrollbar-thin pr-1">
-        {files.map((file, index) => {
-          const isActive = currentIndex === index;
-          const isPlayingThis = isActive && isCurrentPlaying;
+    <div className="space-y-1 max-h-64 overflow-y-auto pr-1 custom-scrollbar">
+      {tracks.map((track) => {
+        const isActive = currentTrack?.id === track.id;
+        const isCurrentlyPlaying = isActive && isPlaying;
 
-          return (
-            <div
-              key={file.id}
-              className="flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-all duration-200 group"
-              style={{
-                background: isActive ? 'rgba(255,215,0,0.12)' : 'rgba(255,255,255,0.03)',
-                border: isActive
-                  ? '1px solid rgba(255,215,0,0.35)'
-                  : '1px solid rgba(255,255,255,0.06)',
-                boxShadow: isActive ? '0 0 12px rgba(255,215,0,0.2)' : 'none',
-              }}
-              onClick={() => onSelect(file, index)}
-            >
-              {/* Track number / playing indicator */}
-              <div
-                className="w-5 h-5 flex items-center justify-center text-xs font-orbitron font-bold shrink-0"
-                style={{ color: isActive ? '#FFD700' : 'rgba(255,255,255,0.3)' }}
-              >
-                {isPlayingThis ? (
-                  <span style={{ animation: 'pulse-gold 1s ease-in-out infinite' }}>▶</span>
-                ) : isActive ? (
-                  '▶'
+        return (
+          <div
+            key={track.id}
+            onClick={() => onSelect(track)}
+            className={`
+              flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer transition-all duration-200 group
+              ${isActive
+                ? 'bg-ultra-gold/15 border border-ultra-gold/40'
+                : 'hover:bg-white/5 border border-transparent'
+              }
+            `}
+          >
+            {/* Play indicator */}
+            <div className="w-5 h-5 shrink-0 flex items-center justify-center">
+              {isCurrentlyPlaying ? (
+                <div className="flex gap-0.5 items-end h-4">
+                  <div className="w-1 bg-ultra-gold rounded-full animate-[bounce_0.6s_ease-in-out_infinite]" style={{ height: '60%' }} />
+                  <div className="w-1 bg-ultra-gold rounded-full animate-[bounce_0.6s_ease-in-out_infinite_0.1s]" style={{ height: '100%' }} />
+                  <div className="w-1 bg-ultra-gold rounded-full animate-[bounce_0.6s_ease-in-out_infinite_0.2s]" style={{ height: '40%' }} />
+                </div>
+              ) : track.isStream ? (
+                <Radio className="w-4 h-4 text-ultra-blue/60" />
+              ) : (
+                <Music className="w-4 h-4 text-white/30 group-hover:text-white/60" />
+              )}
+            </div>
+
+            {/* Track info */}
+            <div className="flex-1 min-w-0">
+              <p className={`text-sm font-rajdhani font-semibold truncate ${isActive ? 'text-ultra-gold' : 'text-white/80'}`}>
+                {track.name}
+              </p>
+              <div className="flex items-center gap-2">
+                <span className={`text-xs px-1.5 py-0.5 rounded font-mono font-bold ${
+                  track.isStream
+                    ? 'bg-ultra-blue/20 text-ultra-blue border border-ultra-blue/30'
+                    : 'bg-white/10 text-white/50'
+                }`}>
+                  {track.isStream ? 'STREAM' : track.format}
+                </span>
+                {track.isStream ? (
+                  <span className="text-xs text-red-400 font-rajdhani font-bold animate-pulse">● LIVE</span>
                 ) : (
-                  index + 1
+                  <span className="text-xs text-white/40 font-mono">{formatDuration(track.duration)}</span>
                 )}
               </div>
-
-              {/* Track info */}
-              <div className="flex-1 min-w-0">
-                <p
-                  className="font-rajdhani font-semibold text-sm truncate leading-tight"
-                  style={{ color: isActive ? '#FFD700' : 'white' }}
-                >
-                  {file.name}
-                </p>
-                <p
-                  className="font-rajdhani text-xs truncate"
-                  style={{ color: 'rgba(255,255,255,0.4)' }}
-                >
-                  {file.artist}
-                </p>
-              </div>
-
-              {/* Duration */}
-              <span
-                className="font-orbitron text-xs shrink-0"
-                style={{ color: 'rgba(255,255,255,0.4)' }}
-              >
-                {formatDuration(file.duration)}
-              </span>
-
-              {/* Format badge */}
-              <span
-                className="font-orbitron text-xs px-1.5 py-0.5 rounded shrink-0"
-                style={{
-                  background: `${FORMAT_COLORS[file.format] || '#FFD700'}20`,
-                  border: `1px solid ${FORMAT_COLORS[file.format] || '#FFD700'}50`,
-                  color: FORMAT_COLORS[file.format] || '#FFD700',
-                  fontSize: '9px',
-                }}
-              >
-                {file.format}
-              </span>
-
-              {/* Remove button */}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onRemove(file.id);
-                }}
-                className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded"
-                style={{
-                  color: 'rgba(255,68,68,0.7)',
-                  cursor: 'pointer',
-                  background: 'none',
-                  border: 'none',
-                }}
-              >
-                <Trash2 size={12} />
-              </button>
             </div>
-          );
-        })}
-      </div>
+
+            {/* Remove button */}
+            <button
+              onClick={(e) => { e.stopPropagation(); onRemove(track.id); }}
+              className="shrink-0 w-6 h-6 flex items-center justify-center rounded text-white/30 hover:text-red-400 hover:bg-red-400/10 transition-colors opacity-0 group-hover:opacity-100"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        );
+      })}
     </div>
   );
 }

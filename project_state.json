@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 21,
+  "projectStateVersion": 31,
   "summary": "Ultra-premium music player web app with dark blue/gold theme, file picker, Web Audio API player with battery charging lock system, combined 20-band EQ + 20 instrument controls panel where each EQ band slider is directly linked to one instrument — turning up an EQ band simultaneously boosts that instrument's sound. Instruments displayed with clean names/icons below the EQ row. 4 sound engines and canvas spectrum visualizer.",
   "architectural_notes": [
     "Single self-contained HTML file with embedded CSS and JavaScript",
@@ -8,15 +8,18 @@
     "Music playback locked until battery animation reaches 100% charge",
     "4 sound engine presets apply different EQ gain curves in real-time",
     "Canvas-based spectrum visualizer using requestAnimationFrame",
-    "Each of the 20 EQ band sliders is 1-to-1 linked to one instrument — moving a band slider boosts/cuts both the frequency band AND that instrument's gain simultaneously"
+    "Each of the 20 EQ band sliders is 1-to-1 linked to one instrument — moving a band slider boosts/cuts both the frequency band AND that instrument's gain simultaneously",
+    "All app subsystems (Processor, Sound Engines, BT Speakers, Smart Chips, Visualizer, Sound Magnet) must be connected through the central audio pipeline — no subsystem should operate independently of the EQ/audio chain"
   ],
   "known_issues": [
     "Instrument names/gain sliders are crammed inside EQ columns and hard to read/use — needs clean separate instrument row below EQ",
     "EQ Stabilizer panel is too large — needs to be reshaped into 4 rows of 5 bands each to reduce height/size",
-    "File picker window does not trigger audio playback — files can be selected but music does not play"
+    "File picker window does not trigger audio playback — files can be selected but music does not play",
+    "App appears non-functional to user — controls may be static/decorative with no working audio or interactivity",
+    "Tapping a track in the playlist does not start audio playback — player remains in NO TRACK SELECTED state",
+    "All 20 Smart Chips stuck on STANDBY regardless of audio state — not receiving audio signal"
   ],
   "isFixRequest": true,
-  "imageRequirements": "## Required Images\n- Colorful cartoon-style illustration of a Bluetooth portable speaker with a visible speaker cone, gold and dark blue color scheme, front-facing view (bluetooth-speaker.dim_120x120.png)",
   "existing_features": [
     {
       "id": "feature-implement-the-global-visual-theme-deep-dark-blue-gradient-background-060918-to-0d1440-primary-gold-yellow-accent-ffd700-electric-blue-secondary-00bfff-glassmorphism-panels-rgba-255-255-255-0-05-with-backdrop-blur-neon-glow-effects-in-yellow-and-blue-ultra-premium-bold-typography-white-and-yellow-text-app-title-bar-reads-ultrasound-pro-with-a-glowing-logo-treatment",
@@ -241,6 +244,46 @@
         "REQ-28"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-upgrade-the-processor-page-header-to-display-high-top-9-0-as-a-prominent-badge-above-the-existing-processor-class-labels-rename-the-four-processor-classes-to-class-a-class-b-class-c-class-d-all-with-plus-suffixes-and-update-their-descriptor-to-self-fixing-prototype-system-auto-detects-corrects-audio-problems-in-real-time-display-this-upgrade-tier-badge-with-a-gold-neon-glow-treatment-consistent-with-the-existing-dark-glassmorphism-style",
+      "title": "Upgrade the Processor page header to display 'HIGH TOP 9.0' as a prominent badge above the existing processor class labels. Rename the four processor classes to Class A+ / Class B+ / Class C+ / Class D+ (all with plus suffixes) and update their descriptor to 'Self-Fixing Prototype System — Auto-Detects & Corrects Audio Problems in Real Time'. Display this upgrade tier badge with a gold neon glow treatment consistent with the existing dark glassmorphism style.",
+      "reqIds": [
+        "REQ-39"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-a-self-fixing-audio-diagnostics-system-inside-the-processor-page-add-a-real-time-auto-fix-monitor-panel-that-continuously-reads-from-the-web-audio-api-analysernode-and-automatically-detects-and-visually-flags-the-following-issues-clipping-signal-exceeds-0-dbfs-stuttering-playback-interruptions-excessive-low-frequency-buildup-and-background-noise-floor-when-an-issue-is-detected-the-corresponding-smart-chip-status-indicator-animates-to-fixing-and-then-fixed-simulating-the-self-correcting-prototype-behavior-apply-a-soft-gain-reduction-correction-via-the-existing-gainnode-when-clipping-is-detected",
+      "title": "Implement a self-fixing audio diagnostics system inside the Processor page. Add a real-time 'Auto-Fix Monitor' panel that continuously reads from the Web Audio API AnalyserNode and automatically detects and visually flags the following issues: clipping (signal exceeds 0 dBFS), stuttering (playback interruptions), excessive low-frequency buildup, and background noise floor. When an issue is detected, the corresponding Smart Chip status indicator animates to 'FIXING…' and then 'FIXED ✓', simulating the self-correcting prototype behavior. Apply a soft gain reduction correction via the existing GainNode when clipping is detected.",
+      "reqIds": [
+        "REQ-40"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-perform-a-comprehensive-end-to-end-fix-of-the-file-picker-window-and-audio-player-to-achieve-100-reliable-file-loading-and-playback-specifically-1-rewrite-the-filepicker-component-so-that-both-drag-and-drop-and-the-browse-button-correctly-pass-selected-file-objects-to-useaudiofiles-2-ensure-useaudiofiles-creates-a-valid-object-url-url-createobjecturl-for-each-file-and-stores-it-on-the-track-3-ensure-useaudioplayer-sets-the-htmlaudioelement-src-to-the-track-s-object-url-synchronously-when-a-track-is-selected-then-calls-audiocontext-resume-before-calling-play-4-ensure-useaudioengine-connects-the-mediaelementsourcenode-to-the-filter-chain-on-every-new-track-load-guarding-against-duplicate-connections-5-wrap-the-play-call-in-a-try-catch-and-display-a-visible-error-toast-with-the-reason-if-playback-fails-6-add-a-console-diagnostic-log-at-each-step-url-created-src-set-context-resumed-node-connected-play-called-to-aid-debugging",
+      "title": "Perform a comprehensive end-to-end fix of the file picker window and audio player to achieve 100% reliable file loading and playback. Specifically: (1) Rewrite the FilePicker component so that both drag-and-drop and the Browse button correctly pass selected File objects to useAudioFiles; (2) Ensure useAudioFiles creates a valid object URL (URL.createObjectURL) for each file and stores it on the track; (3) Ensure useAudioPlayer sets the HTMLAudioElement.src to the track's object URL synchronously when a track is selected, then calls audioContext.resume() before calling play(); (4) Ensure useAudioEngine connects the MediaElementSourceNode to the filter chain on every new track load, guarding against duplicate connections; (5) Wrap the play() call in a try/catch and display a visible error toast with the reason if playback fails; (6) Add a console diagnostic log at each step (URL created, src set, context resumed, node connected, play called) to aid debugging.",
+      "reqIds": [
+        "REQ-41"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-direct-url-streaming-support-to-the-file-picker-and-player-add-a-stream-url-input-field-inside-the-filepicker-component-a-text-input-and-add-stream-button-where-users-can-paste-a-direct-audio-stream-url-e-g-a-direct-mp3-ogg-or-radio-stream-url-when-submitted-the-url-is-added-to-the-playlist-as-a-track-entry-using-the-url-as-the-src-directly-on-the-htmlaudioelement-instead-of-an-object-url-the-track-displays-the-url-hostname-as-its-title-and-a-stream-format-badge-playback-behavior-play-pause-stop-seek-works-the-same-as-for-local-files-this-makes-the-app-relevant-to-younger-users-who-stream-audio-from-direct-links",
+      "title": "Add direct URL streaming support to the file picker and player. Add a 'Stream URL' input field inside the FilePicker component — a text input and 'Add Stream' button — where users can paste a direct audio stream URL (e.g. a direct .mp3, .ogg, or radio stream URL). When submitted, the URL is added to the playlist as a track entry (using the URL as the src directly on the HTMLAudioElement instead of an object URL). The track displays the URL hostname as its title and a 'STREAM' format badge. Playback behavior (play, pause, stop, seek) works the same as for local files. This makes the app relevant to younger users who stream audio from direct links.",
+      "reqIds": [
+        "REQ-42"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-new-project-that-is-a-complete-faithful-copy-of-the-entire-current-ultrasound-pro-application-carrying-over-every-single-feature-component-hook-utility-style-and-configuration-without-omitting-anything-the-new-project-must-be-functionally-and-visually-identical-to-the-current-one",
+      "title": "Create a new project that is a complete, faithful copy of the entire current UltraSound Pro application — carrying over every single feature, component, hook, utility, style, and configuration without omitting anything. The new project must be functionally and visually identical to the current one.",
+      "reqIds": [
+        "REQ-59"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -301,6 +344,232 @@
       "id": "AR-8",
       "summary": "Fix low/unlimited memory issue so audio playback does not hit memory limits",
       "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-9",
+      "summary": "Set up payment system so users can be charged to access UltraSound Pro (to be implemented when app is closer to completion)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-10",
+      "summary": "Fix the mobile layout so that the sound engine selector buttons (Deep Bass Engine, Surround Engine, Pure HD Engine) are displayed in a single horizontal row inside the header — not stacked vertically as shown in the live screenshot. All four engine buttons must fit horizontally on a mobile screen (≤480px wide) with appropriate font size reduction and compact padding so none are cut off.",
+      "reqIds": [
+        "REQ-29"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-11",
+      "summary": "Fix the tab navigation bar (Player / BT Speakers / Processor) so all three tabs are fully visible and tappable on mobile screens without horizontal overflow or clipping. Each tab label and icon must be legible at small screen widths.",
+      "reqIds": [
+        "REQ-30"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-12",
+      "summary": "Redesign the Player tab layout for mobile so that the File Picker section, playlist, player controls, battery widget, spectrum visualizer, Sound Magnet toggle, and EQ Stabilizer panel are all fully accessible by vertical scrolling — no content should be hidden off-screen or require horizontal scrolling on mobile. The overall page must be a single scrollable column on screens ≤768px.",
+      "reqIds": [
+        "REQ-31"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-13",
+      "summary": "Fix the File Picker drag-and-drop zone and Browse button so they are fully functional on mobile (touch events supported). The drop zone must be large enough to tap easily (min 44px touch targets on all interactive elements). After selecting files, the playlist must appear immediately below the file picker with each track showing its name, duration, and format badge.",
+      "reqIds": [
+        "REQ-32"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-14",
+      "summary": "Fix the audio playback so it works end-to-end on mobile browsers: when a track is selected from the playlist, the HTMLAudioElement src is set to the object URL, the AudioContext is resumed from suspended state (required by mobile browser autoplay policy via a user-gesture handler), the MediaElementSourceNode is connected to the filter chain, and play() is called. Add a visible error toast if playback fails, showing the error reason.",
+      "reqIds": [
+        "REQ-33"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-15",
+      "summary": "Improve the BT Speakers tab on mobile: the Bluetooth Speaker Display panel must render the 2–3 animated speaker illustrations stacked vertically (not horizontally side-by-side) on screens ≤480px so each speaker is large enough to see the pulsing cone animation. The live output power (watts) and dB level readouts must be clearly readable below each speaker.",
+      "reqIds": [
+        "REQ-34"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-16",
+      "summary": "Improve the Processor tab on mobile: the 20 Smart Chip cards must be arranged in a 2-column grid (not a single column or horizontal scroll) so all chips are reachable by vertical scrolling. Each chip card must show its chip number, and the 6 status indicators (Boost, Effect, Lagging, Clipping, Stuttering, Zero Background Noise) must be readable at mobile sizes. The processor class labels (Class A+ / B / C+ / D) and spec readouts must all fit within the mobile screen width.",
+      "reqIds": [
+        "REQ-35"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-17",
+      "summary": "Ensure the EQ Stabilizer 4×5 grid fits within the mobile screen width without requiring horizontal scrolling. Each EQ band column card must scale responsively — on screens ≤480px, the 5-column grid should use the full available width with each column being at least 56px wide. The vertical EQ gain slider and frequency label inside each column must remain usable (min 44px touch target height for the slider track).",
+      "reqIds": [
+        "REQ-36"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-18",
+      "summary": "Ensure the instrument cards row (below the EQ grid) also fits within mobile screen width in the 4×5 grid layout. Each instrument card must display the SVG instrument icon (max 40×40px on mobile), the instrument short name, and a gain slider with a min 44px touch target — all within a compact card that fits in a 5-column grid on mobile. Instrument name text must not overflow or be cut off.",
+      "reqIds": [
+        "REQ-37"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-19",
+      "summary": "Add a global mobile-friendly spacing and typography pass: reduce all section padding on screens ≤480px to 8–12px, reduce heading font sizes by approximately 20% on mobile, and ensure all glassmorphism panel cards use consistent border-radius and spacing. The overall app must feel intentionally designed for mobile — not a desktop layout that happens to be viewed on a phone.",
+      "reqIds": [
+        "REQ-38"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-20",
+      "summary": "Add High Top 9.0 processor class upgrade — Class A+/B+/C+/D+ self-fixing prototype system that automatically detects and corrects audio problems in real time",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-21",
+      "summary": "Fix the file picker window and audio player so files load and play with 100% reliability — including streaming support for platforms popular with younger users (e.g. direct URL streaming)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-22",
+      "summary": "Make the Play button and player controls fully functional: clicking the Play button on a selected track in the playlist must actually start audio playback through the HTMLAudioElement. The player must not remain in a 'NO TRACK SELECTED' / static state after a track is tapped in the playlist. Tapping a track row must immediately load it into the player (set the HTMLAudioElement src to the track's object URL), resume the AudioContext (required by mobile autoplay policy on every user gesture), connect the MediaElementSourceNode to the filter chain if not already connected, and call play(). The play button must visually switch to a Pause icon while audio is playing.",
+      "reqIds": [
+        "REQ-43"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-23",
+      "summary": "Fix the file picker so that after files are added to the playlist, clicking/tapping any track row in the playlist immediately selects that track and triggers playback — not just displays it statically. The playlist track rows must be fully interactive tap targets (min 44px height). The currently playing track must be highlighted with a gold accent border or background.",
+      "reqIds": [
+        "REQ-44"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-24",
+      "summary": "Fix the EQ Stabilizer sliders so they are fully interactive and not decorative. Each of the 20 vertical EQ gain sliders must respond to touch/drag input on mobile and immediately update the corresponding BiquadFilterNode gain value in the Web Audio API pipeline. The instrument gain sliders below each EQ column must also be interactive — dragging them must audibly affect the mix and visually move the slider thumb. No slider should appear to move only visually while having no audio effect.",
+      "reqIds": [
+        "REQ-45"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-25",
+      "summary": "Fix the Sound Engine selector buttons (Crystal Engine, Deep Bass Engine, Surround Engine, Pure HD Engine) so tapping them actually switches the audio processing preset — not just visually highlights the button. When a different engine is selected, the 20 BiquadFilterNode gain values must be updated to the preset configuration in audioConstants.ts in real time.",
+      "reqIds": [
+        "REQ-46"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-26",
+      "summary": "Fix the Smart Chip Array on the Processor tab so the chip status indicators (STANDBY / ACTIVE / FIXING / FIXED) respond to real audio data. When audio is playing, chips must transition from STANDBY to ACTIVE. When the AnalyserNode detects clipping or low-frequency buildup, the relevant chips must animate to FIXING and then FIXED. The processor tab must not display all chips as permanently stuck on STANDBY regardless of audio state.",
+      "reqIds": [
+        "REQ-47"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-27",
+      "summary": "Fix the Spectrum Visualizer canvas so it draws live frequency bars in gold (#FFD700) when audio is playing. The canvas must not remain black or empty while music is playing. Ensure the AnalyserNode is correctly connected at the end of the audio filter chain and that the requestAnimationFrame draw loop reads real FFT data from the analyser.",
+      "reqIds": [
+        "REQ-48"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-28",
+      "summary": "Fix the Bluetooth Speaker Display panel so the speaker cone animations pulse in sync with the music. The speaker SVG cone displacement or scale must be driven by the current audio amplitude from the AnalyserNode. The watts and dB readouts must update in real time — not show static placeholder values. The animated speaker must visibly move when music is playing and be still when paused.",
+      "reqIds": [
+        "REQ-49"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-29",
+      "summary": "Fix the Sound Magnet toggle so that when switched ON, the concentric ring animation actually animates and grows with the audio amplitude. The canvas rings must expand outward and pulse driven by real AnalyserNode data — not remain static. When toggled OFF, the animation must fully disappear.",
+      "reqIds": [
+        "REQ-50"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-30",
+      "summary": "Fix the end-to-end audio playback pipeline so that tapping any track row in the playlist immediately loads and plays audio. The track row must set the HTMLAudioElement.src to the track's object URL, call audioContext.resume() (to satisfy mobile browser autoplay policy on every user-gesture event), connect the MediaElementSourceNode to the filter chain if not already connected, then call play(). The player display must switch from 'NO TRACK SELECTED' to the track title and the play button icon must change to Pause while audio is playing. Wrap play() in try/catch and display a visible error toast with the failure reason if it rejects.",
+      "reqIds": [
+        "REQ-51"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-31",
+      "summary": "Fix the useAudioEngine hook so that the AnalyserNode is correctly positioned at the end of the filter chain (source → 20 BiquadFilterNodes → GainNode → AnalyserNode → destination) and that the AnalyserNode reference is exposed to all consumers (SpectrumVisualizer, SoundMagnet, BluetoothSpeakerDisplay, ProcessorPage). On every new track load, re-connect the MediaElementSourceNode to the chain head and confirm the AnalyserNode is live.",
+      "reqIds": [
+        "REQ-52"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-32",
+      "summary": "Fix the Smart Chip status indicators in ProcessorPage so they respond to real audio data from the AnalyserNode. When audio is playing, chips must transition from STANDBY to ACTIVE. When the AnalyserNode detects clipping (signal amplitude ≥ 0 dBFS) or excessive low-frequency buildup, the relevant chips must animate through FIXING… then FIXED ✓. No chip should remain permanently on STANDBY when audio is actively playing.",
+      "reqIds": [
+        "REQ-53"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-33",
+      "summary": "Fix all 20 EQ band vertical sliders and all 20 instrument gain sliders in EQStabilizer so they are fully interactive on both desktop and mobile (touch events). Dragging an EQ slider must immediately update the corresponding BiquadFilterNode gain value in the audio pipeline. Dragging an instrument gain slider must update both the instrument's gain contribution and its linked BiquadFilterNode gain. No slider should be visually movable while having no audio effect.",
+      "reqIds": [
+        "REQ-54"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-34",
+      "summary": "Fix the Sound Engine selector buttons (Crystal Engine, Deep Bass Engine, Surround Engine, Pure HD Engine) so that tapping a button actually applies the corresponding preset's 20 BiquadFilterNode gain values from audioConstants.ts to the audio pipeline in real time — not just visually highlight the button.",
+      "reqIds": [
+        "REQ-55"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-35",
+      "summary": "Fix the BluetoothSpeakerDisplay panel so the speaker cone animations pulse visibly in sync with the playing audio. Speaker cone scale/displacement must be driven by real-time amplitude from the AnalyserNode. The watts and dB readouts must update in real time from the analyser/gain node — not show static placeholder values. When audio is paused or stopped, speaker animations must be still.",
+      "reqIds": [
+        "REQ-56"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-36",
+      "summary": "Fix the SoundMagnet canvas animation so that when the toggle is switched ON, the concentric glowing rings expand outward and pulse driven by real AnalyserNode amplitude data. The rings must visibly grow larger as audio volume increases and shrink when volume decreases. When toggled OFF, the animation canvas must be fully hidden.",
+      "reqIds": [
+        "REQ-57"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-37",
+      "summary": "Fix the App.tsx wiring to ensure the shared AnalyserNode instance from useAudioEngine is passed as a prop (or via context) to every component that needs it: SpectrumVisualizer, SoundMagnet, BluetoothSpeakerDisplay, and ProcessorPage. Ensure useAudioPlayer and useAudioEngine share the same HTMLAudioElement instance so that playing a track in useAudioPlayer automatically routes audio through the engine's filter chain.",
+      "reqIds": [
+        "REQ-58"
+      ],
       "status": "pending"
     }
   ],

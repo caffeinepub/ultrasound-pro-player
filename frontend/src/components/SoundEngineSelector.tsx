@@ -1,52 +1,34 @@
-import { SoundEngine } from '../utils/audioConstants';
+import React from 'react';
+
+const ENGINES = ['Crystal Engine', 'Deep Bass Engine', 'Surround Engine', 'Pure HD Engine'];
 
 interface Props {
-  activeEngine: SoundEngine;
-  onSelect: (engine: SoundEngine) => void;
+  currentEngine: string;
+  onSelect: (engine: string) => void;
 }
 
-const ENGINES: SoundEngine[] = [
-  'Crystal Engine',
-  'Deep Bass Engine',
-  'Surround Engine',
-  'Pure HD Engine'
-];
-
-const ENGINE_ICONS: Record<SoundEngine, string> = {
-  'Crystal Engine': '💎',
-  'Deep Bass Engine': '🔊',
-  'Surround Engine': '🌐',
-  'Pure HD Engine': '✨'
-};
-
-export function SoundEngineSelector({ activeEngine, onSelect }: Props) {
+export default function SoundEngineSelector({ currentEngine, onSelect }: Props) {
   return (
-    <div className="flex items-center gap-2 flex-wrap">
-      <span className="font-orbitron text-xs font-bold uppercase tracking-widest mr-1" style={{ color: 'rgba(255,215,0,0.6)' }}>
-        Engine:
-      </span>
-      {ENGINES.map(engine => (
-        <button
-          key={engine}
-          onClick={() => onSelect(engine)}
-          className="px-3 py-1.5 rounded-md text-xs font-rajdhani font-bold uppercase tracking-wider transition-all duration-200"
-          style={{
-            background: activeEngine === engine
-              ? 'rgba(255,215,0,0.2)'
-              : 'rgba(255,255,255,0.05)',
-            border: activeEngine === engine
-              ? '1px solid rgba(255,215,0,0.6)'
-              : '1px solid rgba(255,255,255,0.1)',
-            color: activeEngine === engine ? '#FFD700' : 'rgba(255,255,255,0.6)',
-            boxShadow: activeEngine === engine
-              ? '0 0 12px rgba(255,215,0,0.3)'
-              : 'none',
-            cursor: 'pointer'
-          }}
-        >
-          {ENGINE_ICONS[engine]} {engine}
-        </button>
-      ))}
+    <div className="flex flex-wrap gap-2 justify-center">
+      {ENGINES.map((engine) => {
+        const isActive = engine === currentEngine;
+        return (
+          <button
+            key={engine}
+            onClick={() => onSelect(engine)}
+            className={`
+              px-3 py-2 rounded-lg font-rajdhani font-semibold text-sm transition-all duration-200
+              min-h-[44px] border
+              ${isActive
+                ? 'bg-ultra-gold/20 border-ultra-gold text-ultra-gold shadow-glow-gold'
+                : 'bg-white/5 border-white/20 text-white/70 hover:border-ultra-blue/60 hover:text-ultra-blue hover:bg-ultra-blue/10'
+              }
+            `}
+          >
+            {engine}
+          </button>
+        );
+      })}
     </div>
   );
 }

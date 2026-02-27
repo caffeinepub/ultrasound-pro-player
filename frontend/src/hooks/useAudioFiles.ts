@@ -1,109 +1,100 @@
-import { useState, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 export interface AudioFile {
   id: string;
-  file: File;
+  file: File | null;
+  url: string;
   name: string;
-  artist: string;
   duration: number;
   format: string;
-  url: string;
+  isStream: boolean;
 }
 
-const ACCEPTED_FORMATS = ['mp3', 'wav', 'flac', 'ogg', 'aac', 'm4a'];
+const SUPPORTED_FORMATS = ['audio/mpeg', 'audio/wav', 'audio/flac', 'audio/ogg', 'audio/aac', 'audio/mp4', 'audio/webm', 'audio/x-m4a'];
+const SUPPORTED_EXTENSIONS = ['.mp3', '.wav', '.flac', '.ogg', '.aac', '.m4a', '.webm'];
 
-function getFormat(filename: string): string {
-  const ext = filename.split('.').pop()?.toLowerCase() ?? '';
-  return ext.toUpperCase();
+function getFormat(file: File): string {
+  const ext = file.name.split('.').pop()?.toLowerCase() || '';
+  const formatMap: Record<string, string> = {
+    mp3: 'MP3', wav: 'WAV', flac: 'FLAC', ogg: 'OGG',
+    aac: 'AAC', m4a: 'M4A', webm: 'WEBM',
+  };
+  return formatMap[ext] || ext.toUpperCase() || 'AUDIO';
 }
 
-function isAccepted(filename: string): boolean {
-  const ext = filename.split('.').pop()?.toLowerCase() ?? '';
-  return ACCEPTED_FORMATS.includes(ext);
+function isSupported(file: File): boolean {
+  if (SUPPORTED_FORMATS.includes(file.type)) return true;
+  const ext = '.' + (file.name.split('.').pop()?.toLowerCase() || '');
+  return SUPPORTED_EXTENSIONS.includes(ext);
 }
 
-function parseNameArtist(filename: string): { name: string; artist: string } {
-  const base = filename.replace(/\.[^/.]+$/, '');
-  if (base.includes(' - ')) {
-    const parts = base.split(' - ');
-    return { artist: parts[0].trim(), name: parts.slice(1).join(' - ').trim() };
-  }
-  return { name: base, artist: 'Unknown Artist' };
-}
-
-async function getAudioDuration(file: File): Promise<number> {
+function getDuration(url: string): Promise<number> {
   return new Promise((resolve) => {
     const audio = new Audio();
-    const url = URL.createObjectURL(file);
+    audio.preload = 'metadata';
+    audio.onloadedmetadata = () => resolve(isFinite(audio.duration) ? audio.duration : 0);
+    audio.onerror = () => resolve(0);
     audio.src = url;
-    audio.onloadedmetadata = () => {
-      URL.revokeObjectURL(url);
-      resolve(audio.duration);
-    };
-    audio.onerror = () => {
-      URL.revokeObjectURL(url);
-      resolve(0);
-    };
-    setTimeout(() => resolve(0), 3000);
   });
 }
 
 export function useAudioFiles() {
   const [files, setFiles] = useState<AudioFile[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  const objectUrls = useState<Map<string, string>>(() => new Map())[0];
 
-  const addFiles = useCallback(async (newFiles: FileList | File[]) => {
-    const fileArray = Array.from(newFiles);
-    const rejected: string[] = [];
-    const accepted: File[] = [];
+  useEffect(() => {
+    return () => {
+      objectUrls.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [objectUrls]);
 
-    for (const f of fileArray) {
-      if (isAccepted(f.name)) {
-        accepted.push(f);
-      } else {
-        rejected.push(f.name);
-      }
+  const addFile = useCallback(async (file: File) => {
+    if (!isSupported(file)) {
+      console.warn('[useAudioFiles] Unsupported format:', file.type, file.name);
+      return;
     }
+    const url = URL.createObjectURL(file);
+    objectUrls.set(file.name + Date.now(), url);
+    const duration = await getDuration(url);
+    const track: AudioFile = {
+      id: crypto.randomUUID(),
+      file,
+      url,
+      name: file.name.replace(/\.[^/.]+$/, ''),
+      duration,
+      format: getFormat(file),
+      isStream: false,
+    };
+    console.log('[useAudioFiles] Added file:', track.name, 'duration:', duration);
+    setFiles((prev) => [...prev, track]);
+  }, [objectUrls]);
 
-    if (rejected.length > 0) {
-      setError(`Rejected: ${rejected.join(', ')} — Only MP3, WAV, FLAC, OGG, AAC accepted`);
-      setTimeout(() => setError(null), 4000);
-    }
-
-    const newAudioFiles: AudioFile[] = await Promise.all(
-      accepted.map(async (f) => {
-        const { name, artist } = parseNameArtist(f.name);
-        const duration = await getAudioDuration(f);
-        const url = URL.createObjectURL(f);
-        return {
-          id: `${f.name}-${f.size}-${Date.now()}`,
-          file: f,
-          name,
-          artist,
-          duration,
-          format: getFormat(f.name),
-          url
-        };
-      })
-    );
-
-    setFiles(prev => {
-      // Avoid duplicates by id
-      const existingIds = new Set(prev.map(f => f.id));
-      const unique = newAudioFiles.filter(f => !existingIds.has(f.id));
-      return [...prev, ...unique];
-    });
+  const addStream = useCallback((url: string) => {
+    const name = url.replace(/^https?:\/\//, '').split('/')[0] || 'Live Stream';
+    const track: AudioFile = {
+      id: crypto.randomUUID(),
+      file: null,
+      url,
+      name,
+      duration: 0,
+      format: 'STREAM',
+      isStream: true,
+    };
+    console.log('[useAudioFiles] Added stream:', url);
+    setFiles((prev) => [...prev, track]);
   }, []);
 
   const removeFile = useCallback((id: string) => {
-    setFiles(prev => {
-      const file = prev.find(f => f.id === id);
-      if (file) URL.revokeObjectURL(file.url);
-      return prev.filter(f => f.id !== id);
+    setFiles((prev) => {
+      const track = prev.find((f) => f.id === id);
+      if (track && track.url.startsWith('blob:')) {
+        URL.revokeObjectURL(track.url);
+      }
+      return prev.filter((f) => f.id !== id);
     });
   }, []);
 
-  const clearError = useCallback(() => setError(null), []);
+  const getFiles = useCallback(() => files, [files]);
 
-  return { files, addFiles, removeFile, error, clearError };
+  return { files, addFile, addStream, removeFile, getFiles };
 }

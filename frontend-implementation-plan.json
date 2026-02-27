@@ -1,87 +1,284 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Build Bluetooth Speaker Display, Smart Chip Processor Page, and Sound Magnet feature",
+  "title": "Migrate entire UltraSound Pro app to a new clean project",
   "requirements": [
     {
-      "id": "REQ-26",
-      "summary": "Build Bluetooth Speaker Display panel showing 2–3 animated speaker illustrations with live output power (watts) and dB level driven by Web Audio API analyser/gain node, speaker cone animation synced to music amplitude",
+      "id": "REQ-59",
+      "summary": "Create a complete, faithful copy of the entire UltraSound Pro application with all features, components, hooks, utilities, styles, and configurations preserved identically",
       "acceptanceCriteria": [
-        "2–3 Bluetooth speaker illustrations are visible on screen within a dedicated panel",
-        "Live wattage output and dB level are displayed and update in real time as audio plays",
-        "Speaker cone animation pulses/moves in sync with music amplitude",
-        "Panel uses the existing dark glassmorphism style with gold/blue glow accents",
-        "Panel is titled 'BLUETOOTH SPEAKER OUTPUT'"
+        "All existing frontend components are present: Header, FilePicker, Playlist, PlayerControls, BatteryWidget, SpectrumVisualizer, EQStabilizer, BluetoothSpeakerDisplay, ProcessorPage, SoundMagnet, SoundMagnetToggle, SoundEngineSelector, AudioEngineFallback, ErrorBoundary",
+        "All existing hooks are present: useAudioEngine, useAudioFiles, useAudioPlayer, useBatteryCharging, useCanvasAnimation, useSoundMagnet, useInternetIdentity, useActor, useQueries",
+        "All utility files are present: audioConstants.ts, instrumentMappings.ts, debounce.ts",
+        "The global visual theme is identical: deep dark blue gradient background (#060918 to #0d1440), gold/yellow accent (#FFD700), electric blue secondary (#00BFFF), glassmorphism panels, neon glow effects",
+        "App title bar reads 'ULTRASOUND PRO' with glowing logo treatment",
+        "The four-region layout is intact: top header with sound engine selector, left panel with file picker and playlist, center panel with player controls/visualizer/battery, bottom panel with EQ Stabilizer",
+        "The 20-band EQ Stabilizer panel (4×5 grid) is present with all 20 EQ band sliders and 20 instrument cards below",
+        "Each EQ band slider is exclusively linked to one instrument (one band = one instrument, Accordion through French Horn mapping)",
+        "All illustrated SVG instrument icons (Accordion, Harp, Acoustic Guitar, Electric Guitar, Mandolin, Banjo, Tambourine, Keyboard, Maracas, Conga, Bagpipes, Bongo Drums, Sitar, Cymbals, Saxophone, Violin, Viola, Cello, Trombone, French Horn) are present in the instrument cards",
+        "The animated battery charging widget (80,000W capacity, 200,000W charger, 0–100% with gold fill animation, music lock until 100%) is present and functional",
+        "The four sound engine presets (Crystal Engine, Deep Bass Engine, Surround Engine, Pure HD Engine) are present in the header selector",
+        "The canvas-based frequency spectrum visualizer draws live bars in gold (#FFD700) when audio is playing",
+        "The Bluetooth Speaker Display panel shows 2–3 animated speaker illustrations with live watts/dB readouts",
+        "The Processor page is present titled 'NUMBER 1 PROCESSOR IN THE WHOLE WORLD' with HIGH TOP 9.0 badge, Class A+/B+/C+/D+ labels, 20 Smart Chips with individual status monitors, and the self-fixing Auto-Fix Monitor",
+        "The Sound Magnet feature with ON/OFF toggle and concentric ring animation is present",
+        "React Error Boundaries wrap every major section",
+        "The FilePicker supports drag-and-drop, browse button, and direct URL streaming input",
+        "The tab navigation (Player / BT Speakers / Processor) is present and all tabs are accessible",
+        "The audio playback pipeline is fully wired: file selection → object URL → HTMLAudioElement src → AudioContext resume → MediaElementSourceNode connection → play()",
+        "The shared AnalyserNode from useAudioEngine is passed to SpectrumVisualizer, SoundMagnet, BluetoothSpeakerDisplay, and ProcessorPage",
+        "The EQ boost/cut legend bar (yellow dot Boost, blue dot Cut, grey dot 0 dB) is present above the EQ Stabilizer panel",
+        "The footer attribution line 'DESIGNED BY ULTRASOUND PRO · 20-BAND INSTRUMENT EQ · CONNECTED TO AUDIO CHAIN' is present at the bottom of the EQ Stabilizer panel",
+        "All Tailwind config, custom fonts (Orbitron, Rajdhani, Inter), CSS custom properties, and global index.css styles are preserved",
+        "Mobile-responsive layout is preserved: sound engine buttons in a single horizontal row on mobile, 2-column chip grid on processor tab, EQ 5-column grid scales to mobile widths, all touch targets min 44px",
+        "All instrument gain sliders and EQ sliders are fully interactive (touch and mouse events) and update the Web Audio API BiquadFilterNode gains in real time",
+        "The backend Motoko actor is included as-is"
       ],
       "file_operations": [
+        {
+          "path": "frontend/index.html",
+          "operation": "create",
+          "description": "Create the HTML entry point with root div, charset meta, viewport meta, and script tag loading main.tsx. Use the exact title 'UltraSound Pro' and preserve favicon references if present in the current project."
+        },
+        {
+          "path": "frontend/tailwind.config.js",
+          "operation": "create",
+          "description": "Create the Tailwind configuration extending the theme with custom fonts (Orbitron, Rajdhani, Inter), oklch-based color tokens, custom 'ultra' brand colors (gold #FFD700, electric blue #00BFFF, deep dark blue gradient #060918 to #0d1440), glow box shadows, accordion keyframes, and plugins for typography, container queries, and animations. Preserve all existing custom utilities and theme extensions."
+        },
+        {
+          "path": "frontend/src/index.css",
+          "operation": "create",
+          "description": "Create the global stylesheet with Tailwind directives (@tailwind base, components, utilities), import Orbitron/Rajdhani/Inter fonts from Google Fonts, define CSS custom properties for the dark sci-fi theme (gold/blue glows, glass panels with backdrop-blur), and include custom component styles for EQ sliders, range inputs, glow effects, and glassmorphism panels. Preserve all existing CSS custom properties and component-specific styles."
+        },
+        {
+          "path": "frontend/src/main.tsx",
+          "operation": "create",
+          "description": "Create the application entry point that imports React, ReactDOM, QueryClient/QueryClientProvider from @tanstack/react-query, InternetIdentityProvider from hooks/useInternetIdentity, App component, and index.css. Mount the React app wrapped in QueryClientProvider (with defaultOptions for queries) and InternetIdentityProvider. Use ReactDOM.createRoot and root.render. Preserve the exact wrapping order and query client configuration."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "create",
+          "description": "Create the root React component that wires together all hooks (useAudioEngine, useAudioFiles, useAudioPlayer, useBatteryCharging, useSoundMagnet) and UI components (Header with SoundEngineSelector, FilePicker, Playlist, PlayerControls, SpectrumVisualizer, BatteryWidget, EQStabilizer, BluetoothSpeakerDisplay, ProcessorPage, SoundMagnet, SoundMagnetToggle, AudioEngineFallback, ErrorBoundary). Manage tabs (Player / BT Speakers / Processor), EQ/instrument gains (20 bands), audio engine state (current preset, EQ values), playlist state, playback state, sound magnet toggle state. Wire the shared AnalyserNode from useAudioEngine to SpectrumVisualizer, SoundMagnet, BluetoothSpeakerDisplay, and ProcessorPage. Implement the four-region layout: top header, left panel (file picker + playlist), center panel (player controls + visualizer + battery), bottom panel (EQ Stabilizer). Preserve the exact layout structure, state management, and component wiring from the current project."
+        },
+        {
+          "path": "frontend/src/components/Header.tsx",
+          "operation": "create",
+          "description": "Create the app header component displaying the UltraSound Pro logo (use generated/speaker-logo.dim_256x256.png from frontend/public/assets/generated/speaker-logo.dim_256x256.png), the title 'ULTRASOUND PRO' with glowing text treatment (gold glow), and a SoundEngineSelector for switching between the four audio engines. Use Orbitron font for the title. Preserve the exact styling, glow effects, and layout from the current project."
+        },
+        {
+          "path": "frontend/src/components/SoundEngineSelector.tsx",
+          "operation": "create",
+          "description": "Create a button group component that lets the user select one of four named sound engines: 'Crystal Engine', 'Deep Bass Engine', 'Surround Engine', 'Pure HD Engine'. Highlight the active selection with gold styling (#FFD700 background or border). On selection, invoke the onSelect callback with the engine name. Use glassmorphism button styling with hover/active states. Preserve the exact button labels, styling, and interaction behavior from the current project."
+        },
+        {
+          "path": "frontend/src/components/FilePicker.tsx",
+          "operation": "create",
+          "description": "Create a file input component supporting drag-and-drop and browse-to-upload for audio files (mp3, wav, flac, ogg, aac, m4a, webm), plus a text input field for adding live stream URLs (http/https). Display drag-over state with visual feedback. On file drop or browse, invoke onAdd callback with File objects. On URL submit, invoke onAdd with the URL string. Use glassmorphism panel styling with gold accents. Preserve the exact drag-drop behavior, URL input, and styling from the current project."
+        },
+        {
+          "path": "frontend/src/components/Playlist.tsx",
+          "operation": "create",
+          "description": "Create a scrollable list component rendering audio tracks with active/playing indicators (gold highlight for active, pulsing animation for playing), format badges (MP3, FLAC, WAV, URL, etc.), track title/duration, and per-track remove buttons (X icon). Show an empty state message ('No tracks loaded. Add audio files or paste a stream URL.') when the playlist is empty. Highlight the currently playing track. Use glassmorphism list item styling. Preserve the exact track display format, indicators, badges, and styling from the current project."
+        },
+        {
+          "path": "frontend/src/components/PlayerControls.tsx",
+          "operation": "create",
+          "description": "Create a playback control bar with play/pause button (toggle icon), previous/next skip buttons, seek slider (range input with time display), volume slider (range input 0-100%), and now-playing display showing the current track title and format badge. Include an error banner (red background) that appears when playback errors occur, displaying the error message. Wire onPlay, onPause, onSeek, onVolumeChange, onNext, onPrevious callbacks. Use glassmorphism panel styling with gold/blue accents for controls. Preserve the exact control layout, icons, seek/volume slider styling, error banner, and now-playing display from the current project."
+        },
+        {
+          "path": "frontend/src/components/SpectrumVisualizer.tsx",
+          "operation": "create",
+          "description": "Create a canvas-based frequency spectrum bar visualizer that reads from an AudioEngine analyser node (getByteFrequencyData) and renders 64-128 vertical bars with color-coded heights (gold #FFD700 for high frequencies, electric blue #00BFFF for mid, gradient for low). Apply glow effects (canvas shadowBlur). Run in a continuous requestAnimationFrame loop. Accept analyserNode prop (AnalyserNode | null). When analyserNode is null, display a static placeholder or empty canvas. Use the useCanvasAnimation hook for the animation loop. Preserve the exact bar count, color gradient, glow effects, and animation loop from the current project."
+        },
+        {
+          "path": "frontend/src/components/BatteryWidget.tsx",
+          "operation": "create",
+          "description": "Create a visual battery widget displaying animated charge level (0-100%), capacity (80,000W), charger power (200,000W), and output power. Render a battery outline with gold fill animation (linear gradient top-to-bottom representing charge percentage). Display charge percentage, wattage readouts, and a 'Music Locked' message until 100% is reached. Wire the BatteryState from useBatteryCharging hook (percentage, watts, isUnlocked). Use glassmorphism panel styling with gold fill animation. Include a lightning bolt icon (use generated/lightning-bolt-icon.dim_128x128.png from frontend/public/assets/generated/lightning-bolt-icon.dim_128x128.png). Preserve the exact battery outline shape, fill animation, wattage displays, and lock message from the current project."
+        },
+        {
+          "path": "frontend/src/components/EQStabilizer.tsx",
+          "operation": "create",
+          "description": "Create a 20-band EQ and instrument gain control panel rendered in a 4×5 grid layout. Top section: 20 vertical EQ band sliders (range -12 to +12 dB, step 0.1, default 0) in a 4-row × 5-column grid. Each slider shows the frequency label (e.g., '20 Hz', '100 Hz', '1 kHz', '10 kHz', '20 kHz') above it. Highlight sliders with gold border when gain > 0 (boost) or blue border when gain < 0 (cut). Below sliders: 20 instrument cards in the same 4×5 grid, each showing the instrument icon (64×64 PNG from frontend/public/assets/generated/instrument-*.dim_64x64.png), instrument name, and a vertical gain slider (range 0-200%, step 1, default 100%). Each EQ band is exclusively linked to one instrument (band 0 = Accordion, band 1 = Harp, ..., band 19 = French Horn) per the instrumentMappings.ts file. Wire debounced onEQChange and onInstrumentGainChange callbacks. Above the EQ grid, display a boost/cut/center legend bar: yellow dot + count for boost (gain > 0), blue dot + count for cut (gain < 0), grey dot + count for center (gain = 0). Below the instrument grid, display the footer attribution line 'DESIGNED BY ULTRASOUND PRO · 20-BAND INSTRUMENT EQ · CONNECTED TO AUDIO CHAIN'. Use glassmorphism panel styling. Use the debounce utility (500ms delay) for slider change handlers. Preserve the exact 4×5 grid layout, slider ranges, instrument-to-band mappings, legend bar, footer line, and styling from the current project."
+        },
         {
           "path": "frontend/src/components/BluetoothSpeakerDisplay.tsx",
           "operation": "create",
-          "description": "Create a React component that renders the Bluetooth Speaker Output panel. Display 2–3 animated speaker illustrations using the generated image frontend/public/assets/generated/bluetooth-speaker.dim_120x120.png. Each speaker shows a pulsing/moving speaker cone driven by the current audio amplitude from the analyserNode prop. Display live output power in watts (calculated from gain node output) and dB level (calculated from analyser data) updated in real time. Use dark glassmorphism card style with gold/blue glow accents. Title the panel 'BLUETOOTH SPEAKER OUTPUT'. Accept analyserNode and gainNode as props to read live audio data."
+          "description": "Create a canvas-free animated component rendering 2-3 Bluetooth speaker visuals (use generated/bluetooth-speaker.dim_120x120.png from frontend/public/assets/generated/bluetooth-speaker.dim_120x120.png) with real-time amplitude-driven effects: glow intensity (box-shadow brightness), cone scaling (transform scale), and dB/watt readouts. Read amplitude data from the analyserNode prop (AnalyserNode | null) using getByteFrequencyData. Update glow and scale in a requestAnimationFrame loop. Display speaker name (e.g., 'Left', 'Center', 'Right'), dB level (calculated from amplitude), and watt output (derived from dB). Use glassmorphism panel styling with animated glow effects. Use the useCanvasAnimation hook for the animation loop. Preserve the exact speaker count, icon usage, amplitude-driven animations, and readout displays from the current project."
         },
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Import and render the BluetoothSpeakerDisplay component in the main app layout. Pass the analyserNode and gainNode from the useAudioEngine hook as props to the component. Position the panel below the spectrum visualizer or in a dedicated section of the layout to ensure it is visible and integrated with the existing UI flow."
-        }
-      ]
-    },
-    {
-      "id": "REQ-27",
-      "summary": "Build a dedicated Processor page titled 'NUMBER 1 PROCESSOR IN THE WHOLE WORLD' displaying four custom processor classes (Class A+/B/C+/D), 20 Smart Chip cards with status indicators, Smart Chip Stabilizer range, Automatic Frequency Control with live animated indicator from AnalyserNode, and battery charge level from useBatteryCharging hook",
-      "acceptanceCriteria": [
-        "Processor page/panel is accessible from the app and titled 'NUMBER 1 PROCESSOR IN THE WHOLE WORLD'",
-        "Header displays Class A+ / Class B / Class C+ / Class D with 'More Super Clean Sound Control' subtitle",
-        "20 Smart Chip cards are rendered, each showing status indicators for Boost, Effect, Lagging, Clipping, Stuttering, Zero Background Noise",
-        "Smart Chip Stabilizer range 80,000–90,000 is displayed",
-        "Automatic Frequency Control section shows a live animated indicator driven by the audio AnalyserNode",
-        "Battery charge level from useBatteryCharging is shown in the processor panel",
-        "All sections use dark glassmorphism card style with gold/blue glow"
-      ],
-      "file_operations": [
         {
           "path": "frontend/src/components/ProcessorPage.tsx",
           "operation": "create",
-          "description": "Create a React component rendering the full Processor page. Title: 'NUMBER 1 PROCESSOR IN THE WHOLE WORLD'. Header section: display 'Class A+ / Class B / Class C+ / Class D' with subtitle 'More Super Clean Sound Control — Not Your Standard Regular Classes'. Main content: (1) Render 20 Smart Chip cards in a grid layout, each card showing the chip number and status indicators (Boost, Effect, Lagging, Clipping, Stuttering, Zero Background Noise) as icon badges or colored indicators. (2) Display '80Hz Deep Low Manager — controlled by the Smart Chip Stabilizer'. (3) Show 'Smart Chip Stabilizer' range: 80,000–90,000. (4) Render 'Intelligent Amp' section: 'Does NOT Limit Music — It CORRECTS It — It Is A Stabilizer'. (5) Display 'Full Stabilizer Power — Super Amp Control — Super Modes for Everything'. (6) Automatic Frequency Control section with a live animated indicator (bar/ring/wave) that responds to frequency content from the analyserNode prop. (7) Special DAW VST Generator section: 'Big Grant FPGA, CPU Booster, Signal Stimulation'. (8) Spec readout: '12 Volt — Best Processor World — 20 Core — 30 Thunders Wide'. (9) Display battery charge level from the batteryState prop (useBatteryCharging hook). Use dark glassmorphism card style with gold/blue glow for all sections. Accept analyserNode and batteryState as props."
-        },
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Import and render the ProcessorPage component in the main app layout. Pass the analyserNode from useAudioEngine and batteryState from useBatteryCharging as props. Position the processor page/panel as an expandable section or a dedicated route accessible from the main UI. Ensure it integrates with the existing layout without disrupting the current player controls, EQ, or visualizer."
-        }
-      ]
-    },
-    {
-      "id": "REQ-28",
-      "summary": "Build a Sound Magnet feature with a large animated radial field visualization that grows with audio amplitude, simulating room-filling sound, with a clearly visible ON/OFF toggle labeled 'SOUND MAGNET'",
-      "acceptanceCriteria": [
-        "Sound Magnet panel/overlay is visible in the app with an ON/OFF toggle labeled 'SOUND MAGNET'",
-        "When ON, a large animated radial field (concentric glowing rings or expanding gradient) is rendered and grows in size proportional to the current audio amplitude from the AnalyserNode",
-        "The visual field is clearly larger than the speaker illustration, representing room-filling sound",
-        "Animation uses gold/yellow glow colors matching the app theme",
-        "When OFF, the animation is fully hidden",
-        "Toggle is clearly accessible and labeled"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/hooks/useSoundMagnet.ts",
-          "operation": "create",
-          "description": "Create a custom React hook to manage the Sound Magnet ON/OFF state. Return the current magnet state (boolean) and a toggle function. Use useState to track the ON/OFF state and persist it in component state (no backend persistence required)."
+          "description": "Create a visual audio processor dashboard with title 'NUMBER 1 PROCESSOR IN THE WHOLE WORLD', HIGH TOP 9.0 badge, Class A+/B+/C+/D+ labels in a horizontal row. Below: 20 Smart Chips in a 4×5 grid (mobile: 2-column), each showing chip name (e.g., 'DSP Core 1', 'EQ Processor', 'Limiter', 'Compressor', 'Reverb Unit', etc.), status indicator (green dot = active, red dot = error, yellow dot = warning), and a small status monitor readout (e.g., 'OK', 'Clipping', 'Buffer Drop'). Include an Auto-Fix Monitor section that auto-detects audio issues (clipping, buffer drops, distortion) by analyzing the analyserNode data and displays detected issues with auto-fix status messages. Below the chips: a real-time frequency bar visualizer (similar to SpectrumVisualizer but smaller, 32-64 bars, gold color) using the analyserNode prop. Animate chip status indicators and visualizer bars in a requestAnimationFrame loop. Accept analyserNode prop (AnalyserNode | null). Use glassmorphism panel styling with gold/blue accents. Preserve the exact title, badge, class labels, chip count/names, auto-fix logic, visualizer, and styling from the current project."
         },
         {
           "path": "frontend/src/components/SoundMagnet.tsx",
           "operation": "create",
-          "description": "Create a React component rendering the Sound Magnet visualization. Accept analyserNode and isOn props. When isOn is true, render a large animated radial field (concentric glowing rings or expanding radial gradient) in the center panel or as an overlay. The field size and animation intensity are driven by the current audio amplitude from the analyserNode (read average amplitude or RMS from analyser data). Use gold/yellow glow colors matching the app theme. The visual field must be clearly larger than the speaker illustration to represent room-filling sound. When isOn is false, hide the animation completely. Use CSS animations or canvas/SVG rendering for smooth visuals."
+          "description": "Create a canvas-based animated visualizer rendering concentric glowing rings, radial gradients, a pulsing core circle, and magnetic field spokes (lines radiating from center) driven by real-time audio analyser data. Read frequency/amplitude data from the analyserNode prop (AnalyserNode | null) using getByteFrequencyData. Animate ring expansion, core pulse, and spoke rotation in a continuous requestAnimationFrame loop. Accept isOn prop (boolean) to enable/disable the animation. When isOn is false, display a static placeholder or empty canvas. Use gold (#FFD700) and electric blue (#00BFFF) colors with glow effects (canvas shadowBlur). Use the useCanvasAnimation hook for the animation loop. Preserve the exact ring count, core size, spoke count, color scheme, glow effects, and animation behavior from the current project."
         },
         {
           "path": "frontend/src/components/SoundMagnetToggle.tsx",
           "operation": "create",
-          "description": "Create a React component rendering the Sound Magnet ON/OFF toggle switch. Accept isOn and onToggle props. Render a clearly labeled button or switch control with the label 'SOUND MAGNET'. Use the existing UI styling (glassmorphism card, gold/blue glow) to match the app theme. When clicked, call onToggle to change the magnet state."
+          "description": "Create a styled toggle UI component for enabling/disabling the Sound Magnet feature. Display a labeled switch (e.g., 'Sound Magnet: ON' / 'Sound Magnet: OFF') with gold styling when ON and blue/grey styling when OFF. Wire the isOn prop (boolean) and onToggle callback. Use glassmorphism button/switch styling with smooth transition animations. Preserve the exact label format, color states, and styling from the current project."
         },
         {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Import and wire the Sound Magnet feature into the app. Use the useSoundMagnet hook to manage the ON/OFF state. Render the SoundMagnetToggle component in a visible location (e.g., near the player controls or in a settings panel). Render the SoundMagnet component in a dedicated section or as an overlay, passing the analyserNode from useAudioEngine and the isOn state from useSoundMagnet. Ensure the toggle is clearly accessible and the animation integrates with the existing layout."
+          "path": "frontend/src/components/AudioEngineFallback.tsx",
+          "operation": "create",
+          "description": "Create a fallback UI component displayed when the Web Audio API is unavailable (e.g., unsupported browser). Show a centered message: 'Web Audio API is not supported in your browser. Please use a modern browser like Chrome, Firefox, or Edge.' Include a browser icon and styling consistent with the app theme (glassmorphism panel, gold text). Preserve the exact message, icon, and styling from the current project."
+        },
+        {
+          "path": "frontend/src/components/ErrorBoundary.tsx",
+          "operation": "create",
+          "description": "Create a React class component that catches rendering errors in child components using componentDidCatch lifecycle method. Display a styled error message panel showing the error message and stack trace, plus a 'Retry' button that resets the error state (setState({ hasError: false, error: null })). Use glassmorphism panel styling with red accent for the error state. Preserve the exact error display format, retry button, and styling from the current project."
+        },
+        {
+          "path": "frontend/src/hooks/useAudioEngine.ts",
+          "operation": "create",
+          "description": "Create a React hook managing a Web Audio API pipeline: AudioContext, multi-band EQ filter chain (20 BiquadFilterNodes, one per band, frequencies from audioConstants.ts), a GainNode for overall gain correction, and an AnalyserNode for frequency data. Export methods: initContext() to resume AudioContext, connectSource(source: MediaElementAudioSourceNode) to wire the source through the filter chain and gain node to the destination and analyser, setEQBand(index: number, gain: number) to adjust individual filter gains, setGainCorrection(gain: number) to adjust the overall gain node, and getAnalyserNode() to return the AnalyserNode for visualizers. Initialize all filters with peaking type, Q value 1.0, and frequencies from audioConstants.ts. Initialize analyserNode with fftSize 2048, smoothingTimeConstant 0.8. Preserve the exact filter chain architecture, node connections, and method signatures from the current project."
+        },
+        {
+          "path": "frontend/src/hooks/useAudioFiles.ts",
+          "operation": "create",
+          "description": "Create a React hook managing a list of audio tracks (type AudioFile: { id: string; file: File | null; url: string; name: string; duration: number; format: string; }). Export methods: addFile(file: File) to create an object URL, detect audio duration via HTMLAudioElement, and add the track to the list; addURL(url: string) to add a direct stream URL (duration 0, format 'URL'); removeFile(id: string) to revoke object URL and remove the track; and getFiles() to return the track list. Handle validation errors (unsupported formats). Use useState for track list state. Preserve the exact AudioFile type, object URL lifecycle, duration detection logic, and method signatures from the current project."
+        },
+        {
+          "path": "frontend/src/hooks/useAudioPlayer.ts",
+          "operation": "create",
+          "description": "Create a React hook managing audio playback state using an HTMLAudioElement and an AudioEngine. Export a PlayerState object: { currentTrack: AudioFile | null; isPlaying: boolean; isPaused: boolean; currentTime: number; duration: number; volume: number; error: string | null; }. Export methods: play(track: AudioFile) to set audio.src to track.url, call audioEngine.initContext(), create MediaElementSourceNode, connect via audioEngine.connectSource(), and call audio.play(); pause() to call audio.pause(); resume() to call audio.play(); seek(time: number) to set audio.currentTime; setVolume(vol: number) to set audio.volume. Listen to audio element events (timeupdate, ended, error, play, pause) and update state. Initialize HTMLAudioElement in a useRef. Preserve the exact PlayerState type, audio pipeline wiring, event listeners, and method signatures from the current project."
+        },
+        {
+          "path": "frontend/src/hooks/useBatteryCharging.ts",
+          "operation": "create",
+          "description": "Create a React hook simulating a battery charging animation over 12 seconds (0% to 100%) using requestAnimationFrame. Export BatteryState: { percentage: number; watts: number; isUnlocked: boolean; }. Start animation on mount. Calculate percentage based on elapsed time (0-12000 ms). Calculate watts as (percentage / 100) * 80000. Set isUnlocked to true when percentage reaches 100. Use useRef for animation frame ID and start time. Preserve the exact 12-second duration, wattage calculation, unlock logic, and BatteryState type from the current project."
+        },
+        {
+          "path": "frontend/src/hooks/useCanvasAnimation.ts",
+          "operation": "create",
+          "description": "Create a minimal React hook that runs a provided draw function (canvasRef: RefObject<HTMLCanvasElement>) => void in a requestAnimationFrame loop. Export start() and stop() methods to control the loop. Use useRef for animation frame ID. Call cancelAnimationFrame on unmount. Preserve the exact loop architecture and method signatures from the current project."
+        },
+        {
+          "path": "frontend/src/hooks/useSoundMagnet.ts",
+          "operation": "create",
+          "description": "Create a simple React hook tracking an on/off boolean toggle state for the 'sound magnet' feature. Export isOn (boolean) and toggle() method. Use useState. Initialize to false. Preserve the exact state type and method signature from the current project."
+        },
+        {
+          "path": "frontend/src/hooks/useInternetIdentity.ts",
+          "operation": "create",
+          "description": "Immutable file, do not modify. This file is provided by the core-infrastructure component and handles Internet Identity authentication."
+        },
+        {
+          "path": "frontend/src/hooks/useActor.ts",
+          "operation": "create",
+          "description": "Immutable file, do not modify. This file is provided by the core-infrastructure component and creates/caches the ICP backend actor."
+        },
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "create",
+          "description": "Create a placeholder module with no backend queries, exported as an empty module for a client-side-only app. Export an empty object or comment indicating no queries are used. Preserve the exact export structure from the current project."
+        },
+        {
+          "path": "frontend/src/utils/audioConstants.ts",
+          "operation": "create",
+          "description": "Create constants file defining: EQ_BANDS array of 20 frequency values (20, 40, 63, 100, 160, 250, 400, 630, 1000, 1600, 2500, 4000, 6300, 10000, 16000, 20000 Hz covering the full spectrum), EQ_GAIN_MIN (-12), EQ_GAIN_MAX (+12), FREQUENCY_LABELS array (20 string labels for each band, e.g., '20 Hz', '100 Hz', '1 kHz', '10 kHz'), and SOUND_ENGINE_PRESETS object with four named presets ('Crystal Engine', 'Deep Bass Engine', 'Surround Engine', 'Pure HD Engine'), each containing a 20-element gain array (number[]) representing the EQ curve for that engine. Preserve the exact frequency values, gain limits, labels, and preset configurations from the current project."
+        },
+        {
+          "path": "frontend/src/utils/debounce.ts",
+          "operation": "create",
+          "description": "Create a generic debounce utility function that delays invoking a function until after a specified millisecond delay since the last call. Type signature: debounce<T extends (...args: any[]) => any>(func: T, delay: number): (...args: Parameters<T>) => void. Use setTimeout/clearTimeout. Preserve the exact type signature and implementation from the current project."
+        },
+        {
+          "path": "frontend/src/utils/instrumentMappings.ts",
+          "operation": "create",
+          "description": "Create a constants file defining INSTRUMENTS array of 20 objects (type Instrument: { id: string; name: string; emoji: string; icon: string; color: string; bandIndex: number; }), mapping each instrument 1-to-1 to a single EQ band index (0–19). Instruments: Accordion (band 0), Harp (band 1), Acoustic Guitar (band 2), Electric Guitar (band 3), Mandolin (band 4), Banjo (band 5), Tambourine (band 6), Keyboard (band 7), Maracas (band 8), Conga (band 9), Bagpipes (band 10), Bongo Drums (band 11), Sitar (band 12), Cymbals (band 13), Saxophone (band 14), Violin (band 15), Viola (band 16), Cello (band 17), Trombone (band 18), French Horn (band 19). For each instrument, set icon path to 'frontend/public/assets/generated/instrument-<name>.dim_64x64.png' (lowercase, hyphens). Assign distinct colors (hex codes) and emojis. Preserve the exact instrument names, band mappings, icon paths, colors, and emojis from the current project."
+        },
+        {
+          "path": "frontend/public/assets/generated/speaker-logo.dim_256x256.png",
+          "operation": "create",
+          "description": "Wire the existing generated image speaker-logo.dim_256x256.png into the frontend as a static asset for the app logo in the Header component. Copy from workspace assets to frontend/public/assets/generated/speaker-logo.dim_256x256.png."
+        },
+        {
+          "path": "frontend/public/assets/generated/lightning-bolt-icon.dim_128x128.png",
+          "operation": "create",
+          "description": "Wire the existing generated image lightning-bolt-icon.dim_128x128.png into the frontend as a static asset for the battery widget lightning icon. Copy from workspace assets to frontend/public/assets/generated/lightning-bolt-icon.dim_128x128.png."
+        },
+        {
+          "path": "frontend/public/assets/generated/bluetooth-speaker.dim_120x120.png",
+          "operation": "create",
+          "description": "Wire the existing generated image bluetooth-speaker.dim_120x120.png into the frontend as a static asset for the Bluetooth speaker visuals in BluetoothSpeakerDisplay. Copy from workspace assets to frontend/public/assets/generated/bluetooth-speaker.dim_120x120.png."
+        },
+        {
+          "path": "frontend/public/assets/generated/instrument-acoustic-guitar.dim_64x64.png",
+          "operation": "create",
+          "description": "Wire the existing generated image instrument-acoustic-guitar.dim_64x64.png into the frontend as a static asset for the Acoustic Guitar instrument card in EQStabilizer. Copy from workspace assets to frontend/public/assets/generated/instrument-acoustic-guitar.dim_64x64.png."
+        },
+        {
+          "path": "frontend/public/assets/generated/instrument-bass-guitar.dim_64x64.png",
+          "operation": "create",
+          "description": "Wire the existing generated image instrument-bass-guitar.dim_64x64.png into the frontend as a static asset. Copy from workspace assets to frontend/public/assets/generated/instrument-bass-guitar.dim_64x64.png."
+        },
+        {
+          "path": "frontend/public/assets/generated/instrument-cello.dim_64x64.png",
+          "operation": "create",
+          "description": "Wire the existing generated image instrument-cello.dim_64x64.png into the frontend as a static asset for the Cello instrument card in EQStabilizer. Copy from workspace assets to frontend/public/assets/generated/instrument-cello.dim_64x64.png."
+        },
+        {
+          "path": "frontend/public/assets/generated/instrument-electric-guitar.dim_64x64.png",
+          "operation": "create",
+          "description": "Wire the existing generated image instrument-electric-guitar.dim_64x64.png into the frontend as a static asset for the Electric Guitar instrument card in EQStabilizer. Copy from workspace assets to frontend/public/assets/generated/instrument-electric-guitar.dim_64x64.png."
+        },
+        {
+          "path": "frontend/public/assets/generated/instrument-flute.dim_64x64.png",
+          "operation": "create",
+          "description": "Wire the existing generated image instrument-flute.dim_64x64.png into the frontend as a static asset. Copy from workspace assets to frontend/public/assets/generated/instrument-flute.dim_64x64.png."
+        },
+        {
+          "path": "frontend/public/assets/generated/instrument-harmonica.dim_64x64.png",
+          "operation": "create",
+          "description": "Wire the existing generated image instrument-harmonica.dim_64x64.png into the frontend as a static asset. Copy from workspace assets to frontend/public/assets/generated/instrument-harmonica.dim_64x64.png."
+        },
+        {
+          "path": "frontend/public/assets/generated/instrument-harp.dim_64x64.png",
+          "operation": "create",
+          "description": "Wire the existing generated image instrument-harp.dim_64x64.png into the frontend as a static asset for the Harp instrument card in EQStabilizer. Copy from workspace assets to frontend/public/assets/generated/instrument-harp.dim_64x64.png."
+        },
+        {
+          "path": "frontend/public/assets/generated/instrument-hi-hat.dim_64x64.png",
+          "operation": "create",
+          "description": "Wire the existing generated image instrument-hi-hat.dim_64x64.png into the frontend as a static asset. Copy from workspace assets to frontend/public/assets/generated/instrument-hi-hat.dim_64x64.png."
+        },
+        {
+          "path": "frontend/public/assets/generated/instrument-kick-drum.dim_64x64.png",
+          "operation": "create",
+          "description": "Wire the existing generated image instrument-kick-drum.dim_64x64.png into the frontend as a static asset. Copy from workspace assets to frontend/public/assets/generated/instrument-kick-drum.dim_64x64.png."
+        },
+        {
+          "path": "frontend/public/assets/generated/instrument-piano.dim_64x64.png",
+          "operation": "create",
+          "description": "Wire the existing generated image instrument-piano.dim_64x64.png into the frontend as a static asset. Copy from workspace assets to frontend/public/assets/generated/instrument-piano.dim_64x64.png."
+        },
+        {
+          "path": "frontend/public/assets/generated/instrument-saxophone.dim_64x64.png",
+          "operation": "create",
+          "description": "Wire the existing generated image instrument-saxophone.dim_64x64.png into the frontend as a static asset for the Saxophone instrument card in EQStabilizer. Copy from workspace assets to frontend/public/assets/generated/instrument-saxophone.dim_64x64.png."
+        },
+        {
+          "path": "frontend/public/assets/generated/instrument-snare.dim_64x64.png",
+          "operation": "create",
+          "description": "Wire the existing generated image instrument-snare.dim_64x64.png into the frontend as a static asset. Copy from workspace assets to frontend/public/assets/generated/instrument-snare.dim_64x64.png."
+        },
+        {
+          "path": "frontend/public/assets/generated/instrument-synthesizer.dim_64x64.png",
+          "operation": "create",
+          "description": "Wire the existing generated image instrument-synthesizer.dim_64x64.png into the frontend as a static asset. Copy from workspace assets to frontend/public/assets/generated/instrument-synthesizer.dim_64x64.png."
+        },
+        {
+          "path": "frontend/public/assets/generated/instrument-trumpet.dim_64x64.png",
+          "operation": "create",
+          "description": "Wire the existing generated image instrument-trumpet.dim_64x64.png into the frontend as a static asset. Copy from workspace assets to frontend/public/assets/generated/instrument-trumpet.dim_64x64.png."
+        },
+        {
+          "path": "frontend/public/assets/generated/instrument-violin.dim_64x64.png",
+          "operation": "create",
+          "description": "Wire the existing generated image instrument-violin.dim_64x64.png into the frontend as a static asset for the Violin instrument card in EQStabilizer. Copy from workspace assets to frontend/public/assets/generated/instrument-violin.dim_64x64.png."
         }
       ]
     }

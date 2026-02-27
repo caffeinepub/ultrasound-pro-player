@@ -2,53 +2,37 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-build-a-bluetooth-speaker-display-panel-that-shows-2-3-animated-bluetooth-speaker-illustrations-on-screen-the-panel-displays-live-output-data-routed-through-the-app-s-current-audio-settings-output-power-in-watts-and-db-level-being-sent-to-the-speaker-updated-in-real-time-from-the-web-audio-api-analyser-gain-node-each-speaker-illustration-renders-an-animated-speaker-cone-that-pulses-and-moves-in-sync-with-the-music-scale-or-displacement-driven-by-the-current-audio-amplitude-the-panel-is-titled-bluetooth-speaker-output-and-uses-the-existing-dark-glassmorphism-card-style-with-gold-blue-glow-accents",
-      "featureTitle": "Build a Bluetooth Speaker Display panel that shows 2–3 animated Bluetooth speaker illustrations on screen. The panel displays live output data routed through the app's current audio settings: output power in watts and dB level being sent to the speaker, updated in real time from the Web Audio API analyser/gain node. Each speaker illustration renders an animated speaker cone that pulses and moves in sync with the music (scale or displacement driven by the current audio amplitude). The panel is titled 'BLUETOOTH SPEAKER OUTPUT' and uses the existing dark glassmorphism card style with gold/blue glow accents.",
+      "featureId": "feature-create-a-new-project-that-is-a-complete-faithful-copy-of-the-entire-current-ultrasound-pro-application-carrying-over-every-single-feature-component-hook-utility-style-and-configuration-without-omitting-anything-the-new-project-must-be-functionally-and-visually-identical-to-the-current-one",
+      "featureTitle": "Create a new project that is a complete, faithful copy of the entire current UltraSound Pro application — carrying over every single feature, component, hook, utility, style, and configuration without omitting anything. The new project must be functionally and visually identical to the current one.",
       "files": [
+        "frontend/index.html",
         "frontend/src/App.tsx",
-        "frontend/src/components/BluetoothSpeakerDisplay.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "blob-storage@4.0.0"
-      ],
-      "testIds": [
-        "REQ-26"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-build-a-dedicated-processor-page-or-expandable-panel-in-the-app-titled-number-1-processor-in-the-whole-world-at-the-top-display-the-four-custom-processor-classes-class-a-class-b-class-c-class-d-labeled-more-super-clean-sound-control-not-your-standard-regular-classes-below-the-header-render-the-full-processor-spec-as-a-styled-info-display-1-20-smart-chips-each-with-its-own-built-in-control-monitor-showing-individual-status-indicators-for-boost-effect-lagging-clipping-stuttering-and-zero-background-noise-2-80hz-deep-low-manager-controlled-by-the-smart-chip-stabilizer-3-smart-chip-stabilizer-range-display-80-000-90-000-4-intelligent-amp-status-does-not-limit-music-it-corrects-it-it-is-a-stabilizer-5-full-stabilizer-power-super-amp-control-super-modes-for-everything-6-automatic-frequency-control-adjusted-to-all-songs-show-a-live-animated-indicator-that-responds-to-the-currently-playing-track-s-frequency-content-via-the-analysernode-7-special-daw-vst-generator-with-big-grant-fpga-cpu-booster-signal-stimulation-8-spec-readout-12-volt-best-processor-world-20-core-30-thunders-wide-9-mix-with-the-battery-already-located-in-the-system-display-the-current-battery-charge-level-from-the-existing-usebatterycharging-hook-all-elements-use-the-dark-glassmorphism-card-style-with-gold-blue-glow",
-      "featureTitle": "Build a dedicated Processor page (or expandable panel) in the app titled 'NUMBER 1 PROCESSOR IN THE WHOLE WORLD'. At the top, display the four custom processor classes: Class A+ / Class B / Class C+ / Class D — labeled 'More Super Clean Sound Control — Not Your Standard Regular Classes'. Below the header, render the full processor spec as a styled info display: (1) 20 Smart Chips — each with its own Built-in Control Monitor showing individual status indicators for Boost, Effect, Lagging, Clipping, Stuttering, and Zero Background Noise; (2) 80Hz Deep Low Manager — controlled by the Smart Chip Stabilizer; (3) Smart Chip Stabilizer range display: 80,000–90,000; (4) Intelligent Amp status — 'Does NOT Limit Music — It CORRECTS It — It Is A Stabilizer'; (5) Full Stabilizer Power — Super Amp Control — Super Modes for Everything; (6) Automatic Frequency Control — Adjusted to All Songs (show a live animated indicator that responds to the currently playing track's frequency content via the AnalyserNode); (7) Special DAW VST Generator — with Big Grant FPGA, CPU Booster, Signal Stimulation; (8) Spec readout: 12 Volt — Best Processor World — 20 Core — 30 Thunders Wide; (9) 'Mix with the Battery already located in the System' — display the current battery charge level from the existing useBatteryCharging hook. All elements use the dark glassmorphism card style with gold/blue glow.",
-      "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/components/ProcessorPage.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "blob-storage@4.0.0"
-      ],
-      "testIds": [
-        "REQ-27"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-build-a-sound-magnet-stimulation-virtual-music-magnifier-feature-render-a-large-animated-circular-radial-field-visualization-in-the-center-panel-or-as-an-overlay-that-grows-in-size-as-the-audio-volume-amplitude-increases-simulating-the-sound-filling-the-room-the-magnet-field-must-be-visually-much-larger-than-a-speaker-it-represents-the-room-being-filled-the-field-animation-uses-concentric-glowing-rings-or-a-pulsing-radial-gradient-in-gold-yellow-that-expand-outward-with-volume-the-feature-has-a-clearly-visible-on-off-toggle-switch-labeled-sound-magnet-when-off-the-animation-is-hidden-this-feature-is-designed-for-small-speakers-e-g-any-small-bluetooth-speaker-to-make-the-audio-feel-larger-than-the-physical-speaker-the-amplitude-data-is-read-from-the-existing-web-audio-api-analysernode",
-      "featureTitle": "Build a 'Sound Magnet — Stimulation Virtual Music Magnifier' feature. Render a large animated circular/radial field visualization in the center panel (or as an overlay) that grows in size as the audio volume/amplitude increases, simulating the sound filling the room. The magnet field must be visually much larger than a speaker — it represents the room being filled. The field animation uses concentric glowing rings or a pulsing radial gradient in gold/yellow that expand outward with volume. The feature has a clearly visible ON/OFF toggle switch labeled 'SOUND MAGNET'. When OFF, the animation is hidden. This feature is designed for small speakers (e.g. any small Bluetooth speaker) to make the audio feel larger than the physical speaker. The amplitude data is read from the existing Web Audio API AnalyserNode.",
-      "files": [
-        "frontend/src/App.tsx",
+        "frontend/src/components/AudioEngineFallback.tsx",
+        "frontend/src/components/BatteryWidget.tsx",
+        "frontend/src/components/BluetoothSpeakerDisplay.tsx",
+        "frontend/src/components/EQStabilizer.tsx",
+        "frontend/src/components/ErrorBoundary.tsx",
+        "frontend/src/components/FilePicker.tsx",
+        "frontend/src/components/Header.tsx",
+        "frontend/src/components/PlayerControls.tsx",
+        "frontend/src/components/Playlist.tsx",
+        "frontend/src/components/ProcessorPage.tsx",
+        "frontend/src/components/SoundEngineSelector.tsx",
         "frontend/src/components/SoundMagnet.tsx",
         "frontend/src/components/SoundMagnetToggle.tsx",
-        "frontend/src/hooks/useSoundMagnet.ts"
+        "frontend/src/components/SpectrumVisualizer.tsx",
+        "frontend/src/hooks/useActor.ts",
+        "frontend/src/hooks/useAudioEngine.ts",
+        "frontend/src/hooks/useAudioFiles.ts",
+        "frontend/src/hooks/useAudioPlayer.ts",
+        "frontend/src/hooks/useBatteryCharging.ts",
+        "frontend/src/hooks/useCanvasAnimation.ts",
+        "frontend/src/hooks/useQueries.ts",
+        "frontend/src/index.css",
+        "frontend/src/utils/audioConstants.ts",
+        "frontend/src/utils/debounce.ts",
+        "frontend/src/utils/instrumentMappings.ts",
+        "frontend/tailwind.config.js"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -56,10 +40,11 @@
         "build-template-react@1.0.0",
         "initial-app@1.0.0",
         "github-export-icp-cli@1.0.0",
-        "blob-storage@4.0.0"
+        "blob-storage@4.0.0",
+        "authorization@4.0.0"
       ],
       "testIds": [
-        "REQ-28"
+        "REQ-59"
       ],
       "confidence": "high"
     }

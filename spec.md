@@ -1,11 +1,20 @@
 # Specification
 
 ## Summary
-**Goal:** Add three new features to UltraSound Pro: a Bluetooth Speaker Output display panel, a Number 1 Processor page, and a Sound Magnet visualization feature.
+**Goal:** Migrate the entire UltraSound Pro application into a new clean project, carrying over every feature, component, hook, utility, style, and configuration without any omissions or changes.
 
 **Planned changes:**
-- Add a "BLUETOOTH SPEAKER OUTPUT" panel with 2–3 animated Bluetooth speaker illustrations whose cones pulse in sync with live audio amplitude from the Web Audio API AnalyserNode; display real-time output wattage and dB level; use dark glassmorphism card style with gold/blue glow accents
-- Add a "NUMBER 1 PROCESSOR IN THE WHOLE WORLD" page/panel with: Class A+ / B / C+ / D header labeled "More Super Clean Sound Control — Not Your Standard Regular Classes"; 20 Smart Chip cards each showing status indicators for Boost, Effect, Lagging, Clipping, Stuttering, and Zero Background Noise; 80Hz Deep Low Manager controlled by Smart Chip Stabilizer with range 80,000–90,000; Intelligent Amp status display; Full Stabilizer Power / Super Amp Control / Super Modes section; Automatic Frequency Control with live animated indicator driven by the AnalyserNode; Special DAW VST Generator with Big Grant FPGA, CPU Booster, Signal Stimulation; spec readout (12 Volt, 20 Core, 30 Thunders Wide); battery charge level from the existing useBatteryCharging hook; all in dark glassmorphism style with gold/blue glow
-- Add a "Sound Magnet — Stimulation Virtual Music Magnifier" panel with an ON/OFF toggle labeled "SOUND MAGNET"; when ON, render a large animated radial field (concentric glowing rings / expanding gold/yellow gradient) that grows proportionally to the current audio amplitude from the AnalyserNode, visually much larger than the speaker illustration; when OFF, hide the animation
+- Copy all frontend components: Header, FilePicker, Playlist, PlayerControls, BatteryWidget, SpectrumVisualizer, EQStabilizer, BluetoothSpeakerDisplay, ProcessorPage, SoundMagnet, SoundMagnetToggle, SoundEngineSelector, AudioEngineFallback, ErrorBoundary
+- Copy all hooks: useAudioEngine, useAudioFiles, useAudioPlayer, useBatteryCharging, useCanvasAnimation, useSoundMagnet, useInternetIdentity, useActor, useQueries
+- Copy all utility files: audioConstants.ts, instrumentMappings.ts, debounce.ts
+- Preserve the full visual theme: deep dark blue gradient, gold/yellow accents, electric blue secondary, glassmorphism panels, neon glow effects, Orbitron/Rajdhani/Inter fonts
+- Preserve the four-region layout: top header with sound engine selector, left panel (file picker/playlist), center panel (player/visualizer/battery), bottom EQ Stabilizer panel
+- Preserve the 20-band EQ Stabilizer with 4×5 grid, all 20 instrument cards, SVG instrument icons, and instrument-to-band mappings
+- Preserve the animated battery charging widget (80,000W / 200,000W charger, gold fill animation, music lock)
+- Preserve the four sound engine presets, canvas spectrum visualizer, Bluetooth Speaker Display, and Sound Magnet feature
+- Preserve the Processor page with HIGH TOP 9.0 badge, Class A+/B+/C+/D+ labels, 20 Smart Chips, and Auto-Fix Monitor
+- Preserve tab navigation (Player / BT Speakers / Processor), drag-and-drop FilePicker, and full audio playback pipeline
+- Preserve mobile-responsive layout, all Tailwind config, CSS custom properties, and global styles
+- Copy the backend Motoko actor as-is
 
-**User-visible outcome:** Users can view animated Bluetooth speaker output stats, explore a detailed processor spec page with live frequency and battery data, and toggle the Sound Magnet visualization that expands with volume to simulate room-filling sound.
+**User-visible outcome:** A new clean project that is functionally and visually identical to the current UltraSound Pro application in every respect.
